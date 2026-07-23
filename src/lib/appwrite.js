@@ -20,6 +20,7 @@ export const COLLECTIONS = {
   COMPLAINTS: "complaints",
   COMPLAINT_CATEGORIES: "complaint_categories",
   NOTIFICATIONS: "notifications",
+  CLIENT_EQUIPMENT: "client_equipment",
 };
 
 export const BUCKETS = {
