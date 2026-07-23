@@ -76,9 +76,39 @@ export function AuthProvider({ children }) {
     setUser(null);
     setProfile(null);
   }
+  async function completeTechnicalFile({ companyName, address, city, equipmentList }) {
+    if (!user || !profile) throw new Error("Session invalide.");
 
+    const updatedDoc = await databases.updateDocument(
+      DATABASE_ID,
+      COLLECTIONS.CLIENTS,
+      profile.$id,
+      { companyName, address, city, technicalFileCompleted: true }
+    );
+
+    for (const item of equipmentList) {
+      await databases.createDocument(
+        DATABASE_ID,
+        COLLECTIONS.CLIENT_EQUIPMENT ?? "client_equipment",
+        ID.unique(),
+        {
+          clientId: user.$id,
+          equipmentType: item.equipmentType,
+          brand: item.brand || "",
+          model: item.model || "",
+          quantity: Number(item.quantity) || 1,
+        },
+        [
+          Permission.read(Role.user(user.$id)),
+          Permission.update(Role.user(user.$id)),
+        ]
+      );
+    }
+
+    setProfile(updatedDoc);
+  }
   return (
-    <AuthContext.Provider value={{ user, profile, loading, register, login, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, register, login, logout, completeTechnicalFile }}>
       {children}
     </AuthContext.Provider>
   );
