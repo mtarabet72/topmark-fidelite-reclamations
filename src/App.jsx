@@ -3,6 +3,7 @@ import { Globe2, Gift, MessageSquareWarning, UserCircle2, Download, WifiOff, Shi
 import { useAuth } from "./lib/AuthContext.jsx";
 import AuthScreen from "./pages/AuthScreen.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import TechnicalFileScreen from "./pages/TechnicalFileScreen.jsx";
 
 /* ============================================================
    PHASE 1 — Shell applicatif TOP MARK + Authentification
@@ -272,7 +273,7 @@ export default function App() {
   const [lang, setLang] = useState("fr");
   const [screen, setScreen] = useState("landing");
   const t = translations[lang];
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   useEffect(() => {
     const link1 = document.createElement("link");
@@ -303,7 +304,7 @@ export default function App() {
   if (loading) {
     content = <div style={{ minHeight: "100vh", backgroundColor: INK }} />;
   } else if (user) {
-    content = <Dashboard />;
+    content = profile && !profile.technicalFileCompleted ? <TechnicalFileScreen /> : <Dashboard />;
   } else if (screen === "login" || screen === "register") {
     content = <AuthScreen mode={screen} setScreen={setScreen} />;
   } else {
