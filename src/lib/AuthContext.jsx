@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { ID } from "appwrite";
+import { ID, Permission, Role } from "appwrite";
 import { account, databases, DATABASE_ID, COLLECTIONS } from "./appwrite";
 
 const AuthContext = createContext();
@@ -43,15 +43,24 @@ export function AuthProvider({ children }) {
     const current = await account.get();
 
     // Création du profil client associé — solde de points à 0 par défaut
-    const doc = await databases.createDocument(DATABASE_ID, COLLECTIONS.CLIENTS, ID.unique(), {
-      userId: current.$id,
-      fullName,
-      phone: "",
-      email,
-      locale,
-      loyaltyPoints: 0,
-      tier: "bronze",
-    });
+    const doc = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTIONS.CLIENTS,
+      ID.unique(),
+      {
+        userId: current.$id,
+        fullName,
+        phone: "",
+        email,
+        locale,
+        loyaltyPoints: 0,
+        tier: "bronze",
+      },
+      [
+        Permission.read(Role.user(current.$id)),
+        Permission.update(Role.user(current.$id)),
+      ]
+    );
 
     setUser(current);
     setProfile(doc);
