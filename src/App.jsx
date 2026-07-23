@@ -1,8 +1,11 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { Globe2, Gift, MessageSquareWarning, UserCircle2, Download, WifiOff, ShieldCheck, ChevronRight, ChevronLeft } from "lucide-react";
+import { useAuth } from "./lib/AuthContext.jsx";
+import AuthScreen from "./pages/AuthScreen.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 
 /* ============================================================
-   PHASE 1 — Shell applicatif TOP MARK, multilingue FR / AR / Tamazight
+   PHASE 1 — Shell applicatif TOP MARK + Authentification
    ============================================================ */
 
 const translations = {
@@ -82,15 +85,15 @@ const LANG_LABEL = { fr: "FR", ar: "ع", zgh: "ⵣ" };
 const FONT_BY_LANG = { fr: "var(--font-body)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 const DISPLAY_FONT_BY_LANG = { fr: "var(--font-display)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 
-const GOLD = "#C9A227";
-const BRONZE = "#8A5A22";
-const INK = "#0D0C09";
-const PANEL = "#171309";
-const CREAM = "#F5F0E1";
-const MUTED = "#B4A780";
+export const GOLD = "#C9A227";
+export const BRONZE = "#8A5A22";
+export const INK = "#0D0C09";
+export const PANEL = "#171309";
+export const CREAM = "#F5F0E1";
+export const MUTED = "#B4A780";
 
-const LangContext = createContext();
-const useLang = () => useContext(LangContext);
+export const LangContext = createContext();
+export const useLang = () => useContext(LangContext);
 
 function BrandMark({ size = 120, opacity = 1, ringOnly = false }) {
   const id = React.useId ? React.useId() : "bm";
@@ -209,7 +212,7 @@ function PlaceholderCard({ title, desc, icon: Icon, accent }) {
   );
 }
 
-function AppShell() {
+function AppShell({ setScreen }) {
   const { t, lang } = useLang();
   const [active, setActive] = useState("home");
 
@@ -242,8 +245,8 @@ function AppShell() {
         <p className="max-w-md text-sm md:text-base" style={{ color: MUTED }}>{t.hero.subtitle}</p>
 
         <div className="flex flex-wrap gap-3 justify-center mt-2">
-          <button className="rounded-full px-6 py-3 text-sm font-semibold transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2" style={{ backgroundColor: GOLD, color: INK }}>{t.hero.cta}</button>
-          <button className="rounded-full px-6 py-3 text-sm font-semibold focus:outline-none focus-visible:ring-2" style={{ border: `1px solid ${CREAM}4D`, color: CREAM }}>{t.hero.ctaSecondary}</button>
+          <button onClick={() => setScreen("login")} className="rounded-full px-6 py-3 text-sm font-semibold transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2" style={{ backgroundColor: GOLD, color: INK }}>{t.hero.cta}</button>
+          <button onClick={() => setScreen("register")} className="rounded-full px-6 py-3 text-sm font-semibold focus:outline-none focus-visible:ring-2" style={{ border: `1px solid ${CREAM}4D`, color: CREAM }}>{t.hero.ctaSecondary}</button>
         </div>
 
         <div className="mt-4">
@@ -267,7 +270,9 @@ function AppShell() {
 
 export default function App() {
   const [lang, setLang] = useState("fr");
+  const [screen, setScreen] = useState("landing");
   const t = translations[lang];
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const link1 = document.createElement("link");
@@ -294,9 +299,20 @@ export default function App() {
     };
   }, []);
 
+  let content;
+  if (loading) {
+    content = <div style={{ minHeight: "100vh", backgroundColor: INK }} />;
+  } else if (user) {
+    content = <Dashboard />;
+  } else if (screen === "login" || screen === "register") {
+    content = <AuthScreen mode={screen} setScreen={setScreen} />;
+  } else {
+    content = <AppShell setScreen={setScreen} />;
+  }
+
   return (
     <LangContext.Provider value={{ lang, setLang, t }}>
-      <AppShell />
+      {content}
     </LangContext.Provider>
   );
 }
