@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Search } from "lucide-react";
 import { listClients, recordPurchase } from "../lib/purchases.js";
-import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
+import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
 
 export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
   const { t } = useLang();
+  const { logout } = useAuth();
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState([]);
   const [selected, setSelected] = useState(null);
   const [kg, setKg] = useState("");
-  const [status, setStatus] = useState(""); // "", "success", "error"
+  const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -49,13 +50,8 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
-       {standalone ? (
-          <button onClick={() => useAuth().logout()} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-            Se déconnecter
-          </button>
-        ) : (
-          {standalone ? (
-          <button onClick={() => useAuth().logout()} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
+        {standalone ? (
+          <button onClick={logout} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
             Se déconnecter
           </button>
         ) : (
@@ -69,7 +65,6 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
           <p className="text-sm mb-5" style={{ color: MUTED }}>Règle : 1 kg acheté = 1 point</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Recherche client */}
             <div>
               <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: GOLD }}>Client</label>
               <div className="flex items-center gap-2 rounded-lg px-3 py-2 mb-2" style={inputStyle}>
@@ -116,7 +111,6 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
               )}
             </div>
 
-            {/* Quantité */}
             <div>
               <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: GOLD }}>Quantité achetée (kg)</label>
               <input
