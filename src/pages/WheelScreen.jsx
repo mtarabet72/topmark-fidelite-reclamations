@@ -10,7 +10,7 @@ import {
   recordSpin,
   photoUrl,
 } from "../lib/tombola.js";
-import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
+import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 const SLICE_COLORS = [GOLD, BRONZE];
 
