@@ -68,6 +68,7 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
               Gérer les lots
             </button>
           </div>
+        </div>
 
         <div className="rounded-2xl p-6" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}>
           <h1 className="text-xl font-semibold mb-1">Enregistrer un achat</h1>
