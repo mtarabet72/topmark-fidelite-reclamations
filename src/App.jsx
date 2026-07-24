@@ -8,10 +8,6 @@ import AdminPurchaseScreen from "./pages/AdminPurchaseScreen.jsx";
 import WheelScreen from "./pages/WheelScreen.jsx";
 import AdminLotsScreen from "./pages/AdminLotsScreen.jsx";
 
-/* ============================================================
-   PHASE 1 — Shell applicatif TOP MARK + Authentification
-   ============================================================ */
-
 const translations = {
   fr: {
     dir: "ltr",
@@ -329,7 +325,7 @@ export default function App() {
   } else {
     content = <AppShell setScreen={setScreen} />;
   }
-   
+
   return (
     <LangContext.Provider value={{ lang, setLang, t }}>
       {content}
