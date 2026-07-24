@@ -50,15 +50,20 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
-        {standalone ? (
-          <button onClick={logout} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-            Se déconnecter
+        <div className="flex items-center justify-between mb-6">
+          {standalone ? (
+            <button onClick={logout} className="flex items-center gap-2 text-sm" style={{ color: MUTED }}>
+              Se déconnecter
+            </button>
+          ) : (
+            <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm" style={{ color: MUTED }}>
+              <ArrowLeft size={16} /> Retour au tableau de bord
+            </button>
+          )}
+          <button onClick={() => setScreen("admin-lots")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+            Gérer les lots
           </button>
-        ) : (
-          <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-            <ArrowLeft size={16} /> Retour au tableau de bord
-          </button>
-        )}
+        </div>
 
         <div className="rounded-2xl p-6" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}>
           <h1 className="text-xl font-semibold mb-1">Enregistrer un achat</h1>
