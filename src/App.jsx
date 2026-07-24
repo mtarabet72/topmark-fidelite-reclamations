@@ -4,6 +4,7 @@ import { useAuth } from "./lib/AuthContext.jsx";
 import AuthScreen from "./pages/AuthScreen.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import TechnicalFileScreen from "./pages/TechnicalFileScreen.jsx";
+import AdminPurchaseScreen from "./pages/AdminPurchaseScreen.jsx";
 
 /* ============================================================
    PHASE 1 — Shell applicatif TOP MARK + Authentification
@@ -273,7 +274,7 @@ export default function App() {
   const [lang, setLang] = useState("fr");
   const [screen, setScreen] = useState("landing");
   const t = translations[lang];
-  const { user, profile, loading } = useAuth();
+  const { user, profile, isAdmin, loading } = useAuth();
 
   useEffect(() => {
     const link1 = document.createElement("link");
@@ -304,13 +305,18 @@ export default function App() {
   if (loading) {
     content = <div style={{ minHeight: "100vh", backgroundColor: INK }} />;
   } else if (user) {
-    content = profile && !profile.technicalFileCompleted ? <TechnicalFileScreen /> : <Dashboard />;
+    if (profile && !profile.technicalFileCompleted) {
+      content = <TechnicalFileScreen />;
+    } else if (screen === "admin" && isAdmin) {
+      content = <AdminPurchaseScreen setScreen={setScreen} />;
+    } else {
+      content = <Dashboard setScreen={setScreen} />;
+    }
   } else if (screen === "login" || screen === "register") {
     content = <AuthScreen mode={screen} setScreen={setScreen} />;
   } else {
     content = <AppShell setScreen={setScreen} />;
   }
-
   return (
     <LangContext.Provider value={{ lang, setLang, t }}>
       {content}
