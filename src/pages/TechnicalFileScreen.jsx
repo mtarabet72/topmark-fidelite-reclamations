@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
-import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
+import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 const EQUIPMENT_TYPES = [
   { value: "presse_cafe", label: "Presse à café" },
