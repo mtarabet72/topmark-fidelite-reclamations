@@ -8,6 +8,7 @@ import AdminPurchaseScreen from "./pages/AdminPurchaseScreen.jsx";
 import WheelScreen from "./pages/WheelScreen.jsx";
 import AdminLotsScreen from "./pages/AdminLotsScreen.jsx";
 import AdminSpinsScreen from "./pages/AdminSpinsScreen.jsx";
+import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 
 const translations = {
   fr: {
@@ -86,7 +87,6 @@ const LANG_LABEL = { fr: "FR", ar: "ع", zgh: "ⵣ" };
 const FONT_BY_LANG = { fr: "var(--font-body)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 const DISPLAY_FONT_BY_LANG = { fr: "var(--font-display)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 
-import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 
 function BrandMark({ size = 120, opacity = 1, ringOnly = false }) {
   const id = React.useId ? React.useId() : "bm";
