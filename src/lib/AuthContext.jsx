@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { ID, Permission, Role } from "appwrite";
-import { account, databases, DATABASE_ID, COLLECTIONS } from "./appwrite";
+import { account, databases, teams, DATABASE_ID, COLLECTIONS } from "./appwrite";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null); // document de la table "clients"
+  const [profile, setProfile] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   async function loadProfile(userId) {
@@ -20,14 +21,26 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function checkAdmin() {
+    try {
+      const res = await teams.list();
+      const admin = res.teams.some((tm) => tm.$id === "support-agents");
+      setIsAdmin(admin);
+    } catch {
+      setIsAdmin(false);
+    }
+  }
+
   async function refreshSession() {
     try {
       const current = await account.get();
       setUser(current);
       await loadProfile(current.$id);
+      await checkAdmin();
     } catch {
       setUser(null);
       setProfile(null);
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
@@ -42,7 +55,6 @@ export function AuthProvider({ children }) {
     await account.createEmailPasswordSession(email, password);
     const current = await account.get();
 
-    // Création du profil client associé — solde de points à 0 par défaut
     const doc = await databases.createDocument(
       DATABASE_ID,
       COLLECTIONS.CLIENTS,
@@ -64,6 +76,7 @@ export function AuthProvider({ children }) {
 
     setUser(current);
     setProfile(doc);
+    await checkAdmin();
   }
 
   async function login({ email, password }) {
@@ -75,7 +88,9 @@ export function AuthProvider({ children }) {
     await account.deleteSession("current");
     setUser(null);
     setProfile(null);
+    setIsAdmin(false);
   }
+
   async function completeTechnicalFile({ companyName, address, city, equipmentList }) {
     if (!user || !profile) throw new Error("Session invalide.");
 
@@ -89,7 +104,7 @@ export function AuthProvider({ children }) {
     for (const item of equipmentList) {
       await databases.createDocument(
         DATABASE_ID,
-        COLLECTIONS.CLIENT_EQUIPMENT ?? "client_equipment",
+        COLLECTIONS.CLIENT_EQUIPMENT,
         ID.unique(),
         {
           clientId: user.$id,
@@ -107,8 +122,11 @@ export function AuthProvider({ children }) {
 
     setProfile(updatedDoc);
   }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, register, login, logout, completeTechnicalFile }}>
+    <AuthContext.Provider
+      value={{ user, profile, isAdmin, loading, register, login, logout, completeTechnicalFile }}
+    >
       {children}
     </AuthContext.Provider>
   );
