@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../lib/AuthContext.jsx";
-import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
+import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 const LOCALE_OPTIONS = [
   { value: "fr", label: "Français" },
