@@ -5,6 +5,8 @@ import AuthScreen from "./pages/AuthScreen.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import TechnicalFileScreen from "./pages/TechnicalFileScreen.jsx";
 import AdminPurchaseScreen from "./pages/AdminPurchaseScreen.jsx";
+import WheelScreen from "./pages/WheelScreen.jsx";
+import AdminLotsScreen from "./pages/AdminLotsScreen.jsx";
 
 /* ============================================================
    PHASE 1 — Shell applicatif TOP MARK + Authentification
@@ -306,12 +308,19 @@ export default function App() {
     content = <div style={{ minHeight: "100vh", backgroundColor: INK }} />;
   } else if (user) {
     if (isAdmin && !profile) {
-      // Compte admin pur, sans fiche client — accès direct et permanent à l'Espace Admin
-      content = <AdminPurchaseScreen standalone />;
+      if (screen === "admin-lots") {
+        content = <AdminLotsScreen setScreen={setScreen} />;
+      } else {
+        content = <AdminPurchaseScreen standalone setScreen={setScreen} />;
+      }
     } else if (profile && !profile.technicalFileCompleted) {
       content = <TechnicalFileScreen />;
+    } else if (screen === "admin-lots" && isAdmin) {
+      content = <AdminLotsScreen setScreen={setScreen} />;
     } else if (screen === "admin" && isAdmin) {
       content = <AdminPurchaseScreen setScreen={setScreen} />;
+    } else if (screen === "tombola") {
+      content = <WheelScreen setScreen={setScreen} />;
     } else {
       content = <Dashboard setScreen={setScreen} />;
     }
@@ -320,6 +329,7 @@ export default function App() {
   } else {
     content = <AppShell setScreen={setScreen} />;
   }
+   
   return (
     <LangContext.Provider value={{ lang, setLang, t }}>
       {content}
