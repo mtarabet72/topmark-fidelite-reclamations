@@ -9,7 +9,7 @@ import {
   uploadLotPhoto,
   photoUrl,
 } from "../lib/tombola.js";
-import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
+import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 function rangeLabel(r) {
   return `${r.min} – ${r.max} kg`;
