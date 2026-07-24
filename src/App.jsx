@@ -305,7 +305,10 @@ export default function App() {
   if (loading) {
     content = <div style={{ minHeight: "100vh", backgroundColor: INK }} />;
   } else if (user) {
-    if (profile && !profile.technicalFileCompleted) {
+    if (isAdmin && !profile) {
+      // Compte admin pur, sans fiche client — accès direct et permanent à l'Espace Admin
+      content = <AdminPurchaseScreen standalone />;
+    } else if (profile && !profile.technicalFileCompleted) {
       content = <TechnicalFileScreen />;
     } else if (screen === "admin" && isAdmin) {
       content = <AdminPurchaseScreen setScreen={setScreen} />;
