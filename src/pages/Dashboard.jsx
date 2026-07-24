@@ -42,7 +42,11 @@ export default function Dashboard({ setScreen }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-2xl p-5" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}>
+          <div
+            onClick={() => setScreen("tombola")}
+            className="rounded-2xl p-5 cursor-pointer"
+            style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}
+          >
             <Gift size={20} color={GOLD} className="mb-2" />
             <p className="font-semibold mb-1">{t.sections.loyaltyTitle}</p>
             <p className="text-sm" style={{ color: MUTED }}>{t.sections.loyaltyDesc}</p>
