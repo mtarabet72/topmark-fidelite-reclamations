@@ -51,7 +51,11 @@ export default function Dashboard({ setScreen }) {
             <p className="font-semibold mb-1">{t.sections.loyaltyTitle}</p>
             <p className="text-sm" style={{ color: MUTED }}>{t.sections.loyaltyDesc}</p>
           </div>
-          <div className="rounded-2xl p-5" style={{ backgroundColor: PANEL, border: `1px solid ${BRONZE}33` }}>
+          <div
+            onClick={() => setScreen("complaints")}
+            className="rounded-2xl p-5 cursor-pointer"
+            style={{ backgroundColor: PANEL, border: `1px solid ${BRONZE}33` }}
+          >
             <MessageSquareWarning size={20} color={BRONZE} className="mb-2" />
             <p className="font-semibold mb-1">{t.sections.claimsTitle}</p>
             <p className="text-sm" style={{ color: MUTED }}>{t.sections.claimsDesc}</p>
