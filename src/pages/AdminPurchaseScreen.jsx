@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Search } from "lucide-react";
 import { listClients, recordPurchase } from "../lib/purchases.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
+import { useAuth } from "../lib/AuthContext.jsx";
 
-export default function AdminPurchaseScreen({ setScreen }) {
+export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
   const { t } = useLang();
   const [search, setSearch] = useState("");
   const [clients, setClients] = useState([]);
@@ -48,9 +49,20 @@ export default function AdminPurchaseScreen({ setScreen }) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
-        <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-          <ArrowLeft size={16} /> Retour au tableau de bord
-        </button>
+       {standalone ? (
+          <button onClick={() => useAuth().logout()} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
+            Se déconnecter
+          </button>
+        ) : (
+          {standalone ? (
+          <button onClick={() => useAuth().logout()} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
+            Se déconnecter
+          </button>
+        ) : (
+          <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
+            <ArrowLeft size={16} /> Retour au tableau de bord
+          </button>
+        )}
 
         <div className="rounded-2xl p-6" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}>
           <h1 className="text-xl font-semibold mb-1">Enregistrer un achat</h1>
