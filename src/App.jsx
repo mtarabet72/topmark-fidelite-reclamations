@@ -7,6 +7,7 @@ import TechnicalFileScreen from "./pages/TechnicalFileScreen.jsx";
 import AdminPurchaseScreen from "./pages/AdminPurchaseScreen.jsx";
 import WheelScreen from "./pages/WheelScreen.jsx";
 import AdminLotsScreen from "./pages/AdminLotsScreen.jsx";
+import AdminSpinsScreen from "./pages/AdminSpinsScreen.jsx";
 
 const translations = {
   fr: {
@@ -298,6 +299,8 @@ export default function App() {
     if (isAdmin && !profile) {
       if (screen === "admin-lots") {
         content = <AdminLotsScreen setScreen={setScreen} />;
+      } else if (screen === "admin-spins") {
+        content = <AdminSpinsScreen setScreen={setScreen} />;
       } else {
         content = <AdminPurchaseScreen standalone setScreen={setScreen} />;
       }
@@ -305,6 +308,8 @@ export default function App() {
       content = <TechnicalFileScreen />;
     } else if (screen === "admin-lots" && isAdmin) {
       content = <AdminLotsScreen setScreen={setScreen} />;
+    } else if (screen === "admin-spins" && isAdmin) {
+      content = <AdminSpinsScreen setScreen={setScreen} />;
     } else if (screen === "admin" && isAdmin) {
       content = <AdminPurchaseScreen setScreen={setScreen} />;
     } else if (screen === "tombola") {
