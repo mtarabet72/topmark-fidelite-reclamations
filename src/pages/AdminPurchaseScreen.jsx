@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Search } from "lucide-react";
 import { listClients, recordPurchase } from "../lib/purchases.js";
 import { useAuth } from "../lib/AuthContext.jsx";
-import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../App.jsx";
+import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
   const { t } = useLang();
