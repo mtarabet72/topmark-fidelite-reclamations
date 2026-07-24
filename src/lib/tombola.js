@@ -112,3 +112,16 @@ export async function updatePrize(prizeId, data) {
 export async function deletePrize(prizeId) {
   return databases.deleteDocument(DATABASE_ID, COLLECTIONS.WHEEL_PRIZES, prizeId);
 }
+
+// Liste tous les tirages, du plus récent au plus ancien (vue admin)
+export async function listAllSpins() {
+  const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, [
+    Query.orderDesc("spunAt"),
+    Query.limit(200),
+  ]);
+  return res.documents;
+}
+
+export async function markSpinDelivered(spinId, delivered) {
+  return databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spinId, { delivered });
+}
