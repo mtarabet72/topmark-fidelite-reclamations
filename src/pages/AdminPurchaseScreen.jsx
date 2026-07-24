@@ -60,10 +60,14 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
               <ArrowLeft size={16} /> Retour au tableau de bord
             </button>
           )}
-          <button onClick={() => setScreen("admin-lots")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
-            Gérer les lots
-          </button>
-        </div>
+          <div className="flex gap-2">
+            <button onClick={() => setScreen("admin-spins")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+              Tirages
+            </button>
+            <button onClick={() => setScreen("admin-lots")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+              Gérer les lots
+            </button>
+          </div>
 
         <div className="rounded-2xl p-6" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}>
           <h1 className="text-xl font-semibold mb-1">Enregistrer un achat</h1>
