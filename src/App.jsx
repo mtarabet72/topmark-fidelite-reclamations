@@ -85,15 +85,7 @@ const LANG_LABEL = { fr: "FR", ar: "ع", zgh: "ⵣ" };
 const FONT_BY_LANG = { fr: "var(--font-body)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 const DISPLAY_FONT_BY_LANG = { fr: "var(--font-display)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 
-export const GOLD = "#C9A227";
-export const BRONZE = "#8A5A22";
-export const INK = "#0D0C09";
-export const PANEL = "#171309";
-export const CREAM = "#F5F0E1";
-export const MUTED = "#B4A780";
-
-export const LangContext = createContext();
-export const useLang = () => useContext(LangContext);
+import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 
 function BrandMark({ size = 120, opacity = 1, ringOnly = false }) {
   const id = React.useId ? React.useId() : "bm";
