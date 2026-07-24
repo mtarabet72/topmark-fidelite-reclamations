@@ -34,10 +34,20 @@ export default function AdminSpinsScreen({ setScreen }) {
   }
 
   async function toggleDelivered(spin) {
-    await markSpinDelivered(spin.$id, !spin.delivered);
+    const client = clientOf(spin);
+    const willDeliver = !spin.delivered;
+
+    const { newBalance } = await markSpinDelivered(spin.$id, willDeliver, willDeliver ? client : null);
+
     setSpins((prev) =>
-      prev.map((s) => (s.$id === spin.$id ? { ...s, delivered: !s.delivered } : s))
+      prev.map((s) => (s.$id === spin.$id ? { ...s, delivered: willDeliver } : s))
     );
+
+    if (willDeliver && client && newBalance !== null) {
+      setClients((prev) =>
+        prev.map((c) => (c.$id === client.$id ? { ...c, loyaltyPoints: newBalance } : c))
+      );
+    }
   }
 
   const visibleSpins = spins.filter((s) => {
@@ -118,6 +128,7 @@ export default function AdminSpinsScreen({ setScreen }) {
                   </p>
                   <p className="text-xs" style={{ color: MUTED }}>
                     Palier {spin.thresholdPoints} kg · {new Date(spin.spunAt).toLocaleDateString("fr-FR")}
+                    {client && ` · Solde : ${client.loyaltyPoints} pts`}
                   </p>
                 </div>
 
