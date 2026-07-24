@@ -122,6 +122,29 @@ export async function listAllSpins() {
   return res.documents;
 }
 
-export async function markSpinDelivered(spinId, delivered) {
-  return databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spinId, { delivered });
+export async function markSpinDelivered(spinId, delivered, client = null) {
+  const spin = await databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spinId, {
+    delivered,
+  });
+
+  // À la remise du lot, on déduit le seuil du palier des points du client
+  if (delivered && client) {
+    const deduction = spin.thresholdPoints || 0;
+    const newBalance = Math.max((client.loyaltyPoints || 0) - deduction, 0);
+
+    await databases.updateDocument(DATABASE_ID, COLLECTIONS.CLIENTS, client.$id, {
+      loyaltyPoints: newBalance,
+    });
+
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
+      clientId: client.userId,
+      type: "roue",
+      points: -deduction,
+      reason: `Lot remis (palier ${deduction} kg)`,
+    });
+
+    return { spin, newBalance };
+  }
+
+  return { spin, newBalance: client?.loyaltyPoints ?? null };
 }
