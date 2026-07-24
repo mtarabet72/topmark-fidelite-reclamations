@@ -9,7 +9,8 @@ import WheelScreen from "./pages/WheelScreen.jsx";
 import AdminLotsScreen from "./pages/AdminLotsScreen.jsx";
 import AdminSpinsScreen from "./pages/AdminSpinsScreen.jsx";
 import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
-
+import ComplaintsScreen from "./pages/ComplaintsScreen.jsx";
+import AdminComplaintsScreen from "./pages/AdminComplaintsScreen.jsx";
 const translations = {
   fr: {
     dir: "ltr",
@@ -301,6 +302,8 @@ export default function App() {
         content = <AdminLotsScreen setScreen={setScreen} />;
       } else if (screen === "admin-spins") {
         content = <AdminSpinsScreen setScreen={setScreen} />;
+      } else if (screen === "admin-complaints") {
+        content = <AdminComplaintsScreen setScreen={setScreen} />;
       } else {
         content = <AdminPurchaseScreen standalone setScreen={setScreen} />;
       }
@@ -310,10 +313,14 @@ export default function App() {
       content = <AdminLotsScreen setScreen={setScreen} />;
     } else if (screen === "admin-spins" && isAdmin) {
       content = <AdminSpinsScreen setScreen={setScreen} />;
+    } else if (screen === "admin-complaints" && isAdmin) {
+      content = <AdminComplaintsScreen setScreen={setScreen} />;
     } else if (screen === "admin" && isAdmin) {
       content = <AdminPurchaseScreen setScreen={setScreen} />;
     } else if (screen === "tombola") {
       content = <WheelScreen setScreen={setScreen} />;
+    } else if (screen === "complaints") {
+      content = <ComplaintsScreen setScreen={setScreen} />;
     } else {
       content = <Dashboard setScreen={setScreen} />;
     }
