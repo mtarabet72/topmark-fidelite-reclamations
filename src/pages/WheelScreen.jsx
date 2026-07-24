@@ -83,10 +83,14 @@ export default function WheelScreen({ setScreen }) {
 
         {loading && <p className="text-sm text-center" style={{ color: MUTED }}>Chargement…</p>}
 
-        {!loading && !availableRange && !result && (
+        {!loading && (!availableRange || prizes.length === 0) && !result && (
           <div className="rounded-2xl p-6 text-center" style={inputPanel}>
-            <p className="mb-2">Aucun tirage disponible pour le moment.</p>
-            {nextLocked ? (
+            <p className="mb-2">
+              {availableRange && prizes.length === 0
+                ? `Palier ${availableRange.min}-${availableRange.max} kg débloqué, mais aucun lot n'est encore configuré pour cette tranche. Contactez TOP MARK.`
+                : "Aucun tirage disponible pour le moment."}
+            </p>
+            {!availableRange && nextLocked ? (
               <p className="text-sm" style={{ color: MUTED }}>
                 Encore <strong style={{ color: GOLD }}>{nextLocked.min - (profile?.loyaltyPoints || 0)} kg</strong> à
                 acheter pour débloquer le prochain tirage ({nextLocked.min}–{nextLocked.max} kg).
