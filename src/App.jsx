@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Globe2, Gift, MessageSquareWarning, UserCircle2, Download, WifiOff, ShieldCheck, ChevronRight, ChevronLeft } from "lucide-react";
 import { useAuth } from "./lib/AuthContext.jsx";
 import AuthScreen from "./pages/AuthScreen.jsx";
