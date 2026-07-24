@@ -50,6 +50,7 @@ export function findNextLockedRange(loyaltyPoints, spins) {
   const claimedThresholds = new Set(spins.map((s) => s.thresholdPoints));
   return RANGES.find((r) => !claimedThresholds.has(r.min) && loyaltyPoints < r.min) || null;
 }
+
 export function findAvailableRange(loyaltyPoints, spins) {
   const claimedThresholds = new Set(spins.map((s) => s.thresholdPoints));
   const unlockedRanges = RANGES.filter((r) => loyaltyPoints >= r.min && !claimedThresholds.has(r.min));
