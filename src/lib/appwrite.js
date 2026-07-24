@@ -26,6 +26,7 @@ export const COLLECTIONS = {
 export const BUCKETS = {
   COMPLAINT_ATTACHMENTS: "complaint_attachments",
   AVATARS: "avatars",
+  LOT_PHOTOS: "lot_photos",
 };
 
 export default client;
