@@ -11,6 +11,7 @@ import {
 } from "../lib/complaints.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
+import LangToggle from "../components/LangToggle.jsx";
 
 export default function ComplaintsScreen({ setScreen }) {
   const { t, lang } = useLang();
@@ -26,6 +27,8 @@ export default function ComplaintsScreen({ setScreen }) {
   const [files, setFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const locale = lang === "ar" ? "ar-MA" : "fr-FR";
 
   async function refresh() {
     setLoading(true);
@@ -71,9 +74,12 @@ export default function ComplaintsScreen({ setScreen }) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
-        <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-          <ArrowLeft size={16} /> {ui.backToDashboard}
-        </button>
+        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm" style={{ color: MUTED }}>
+            <ArrowLeft size={16} /> {ui.backToDashboard}
+          </button>
+          <LangToggle />
+        </div>
 
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-xl font-semibold">{t.sections.claimsTitle}</h1>
@@ -193,7 +199,7 @@ export default function ComplaintsScreen({ setScreen }) {
                 )}
 
                 <p className="text-xs mt-2" style={{ color: MUTED }}>
-                  {new Date(c.$createdAt).toLocaleDateString(lang === "ar" ? "ar-MA" : "fr-FR")}
+                  {new Date(c.$createdAt).toLocaleDateString(locale)}
                 </p>
               </div>
             );
