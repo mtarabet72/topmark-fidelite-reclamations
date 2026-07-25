@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, RotateCcw, Check } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import {
   listActivePrizesForRange,
   listClientSpins,
   findAvailableRange,
   findNextLockedRange,
+  findPendingSpin,
   drawPrize,
-  recordSpin,
+  startSpin,
+  retrySpin,
+  confirmSpin,
   photoUrl,
+  MAX_ATTEMPTS,
 } from "../lib/tombola.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
@@ -25,9 +29,12 @@ export default function WheelScreen({ setScreen }) {
   const [availableRange, setAvailableRange] = useState(null);
   const [nextLocked, setNextLocked] = useState(null);
   const [prizes, setPrizes] = useState([]);
+  const [pending, setPending] = useState(null);      // tirage en attente de confirmation
+  const [currentPrize, setCurrentPrize] = useState(null); // lot affiché après animation
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState(null);
+  const [confirming, setConfirming] = useState(false);
+  const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [balance, setBalance] = useState(profile?.loyaltyPoints || 0);
 
@@ -36,6 +43,18 @@ export default function WheelScreen({ setScreen }) {
     const spins = await listClientSpins(user.$id);
     const points = profile?.loyaltyPoints || 0;
     setBalance(points);
+
+    const inProgress = findPendingSpin(spins);
+    if (inProgress) {
+      setPending(inProgress);
+      const list = await listActivePrizesForRange(inProgress.thresholdPoints);
+      setPrizes(list);
+      setCurrentPrize(list.find((p) => p.$id === inProgress.prizeId) || null);
+      setAvailableRange({ min: inProgress.thresholdPoints, max: inProgress.thresholdPoints });
+      setLoading(false);
+      return;
+    }
+
     const range = findAvailableRange(points, spins);
     setAvailableRange(range);
     if (range) {
@@ -51,46 +70,68 @@ export default function WheelScreen({ setScreen }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function animateTo(prize) {
+    const index = prizes.findIndex((p) => p.$id === prize.$id);
+    const anglePerSlice = 360 / prizes.length;
+    const landing = 360 - (index * anglePerSlice + anglePerSlice / 2);
+    const current = rotation % 360;
+    const delta = ((landing - current) % 360 + 360) % 360;
+    setRotation(rotation + 6 * 360 + delta);
+  }
+
   async function handleSpin() {
     if (spinning || prizes.length === 0 || !profile) return;
     setError("");
     setSpinning(true);
+    setCurrentPrize(null);
 
     const winner = drawPrize(prizes);
 
-    // Le tirage est enregistré et les points déduits AVANT l'animation :
-    // impossible de rejouer ce palier, même en fermant l'application.
-    let newBalance;
     try {
-      newBalance = await recordSpin({
-        client: profile,
-        prize: winner,
-        thresholdPoints: availableRange.min,
-      });
+      if (!pending) {
+        const created = await startSpin({
+          client: profile,
+          prize: winner,
+          thresholdPoints: availableRange.min,
+        });
+        setPending(created);
+      } else {
+        const updated = await retrySpin({ spin: pending, prize: winner });
+        setPending(updated);
+      }
     } catch (err) {
       setSpinning(false);
       setError(err.message || ui.errorOccurred);
       return;
     }
 
-    setBalance(newBalance);
-
-    const winnerIndex = prizes.findIndex((p) => p.$id === winner.$id);
-    const anglePerSlice = 360 / prizes.length;
-    const landingAngle = 360 - (winnerIndex * anglePerSlice + anglePerSlice / 2);
-    const extraSpins = 6 * 360;
-    const current = rotation % 360;
-    const delta = ((landingAngle - current) % 360 + 360) % 360;
-    setRotation(rotation + extraSpins + delta);
+    animateTo(winner);
 
     setTimeout(() => {
-      setResult(winner);
+      setCurrentPrize(winner);
       setSpinning(false);
-      if (refreshSession) refreshSession();
     }, 4200);
   }
 
+  async function handleConfirm() {
+    if (!pending || !profile) return;
+    setConfirming(true);
+    setError("");
+    try {
+      await confirmSpin({ client: profile, spin: pending });
+      setBalance(0);
+      setDone(true);
+      if (refreshSession) refreshSession();
+    } catch (err) {
+      setError(err.message || ui.errorOccurred);
+    } finally {
+      setConfirming(false);
+    }
+  }
+
   const panel = { backgroundColor: PANEL, border: `1px solid ${GOLD}33` };
+  const attempts = pending?.attemptNumber || 0;
+  const canRetry = attempts > 0 && attempts < MAX_ATTEMPTS;
   const noDrawPossible = !availableRange || prizes.length === 0;
 
   return (
@@ -110,7 +151,28 @@ export default function WheelScreen({ setScreen }) {
 
         {loading && <p className="text-sm text-center" style={{ color: MUTED }}>{ui.loading}</p>}
 
-        {!loading && noDrawPossible && !result && (
+        {/* Écran final après confirmation */}
+        {done && currentPrize && (
+          <div className="rounded-2xl p-6 text-center flex flex-col items-center gap-3" style={panel}>
+            <Sparkles size={32} color={GOLD} />
+            <p className="text-lg font-semibold">{ui.congrats}</p>
+            {currentPrize.photoFileId && (
+              <img src={photoUrl(currentPrize.photoFileId)} alt={currentPrize.label} className="w-32 h-32 rounded-xl object-cover" />
+            )}
+            <p style={{ color: GOLD }}>{currentPrize.label}</p>
+            <p className="text-xs" style={{ color: MUTED }}>{ui.contactRep}</p>
+            <button
+              onClick={() => setScreen("dashboard")}
+              className="rounded-full px-6 py-2.5 text-sm font-semibold mt-2"
+              style={{ backgroundColor: GOLD, color: INK }}
+            >
+              {ui.backToDashboard}
+            </button>
+          </div>
+        )}
+
+        {/* Aucun tirage possible */}
+        {!loading && !done && noDrawPossible && (
           <div className="rounded-2xl p-6 text-center" style={panel}>
             <p className="mb-2">
               {availableRange && prizes.length === 0
@@ -127,11 +189,18 @@ export default function WheelScreen({ setScreen }) {
           </div>
         )}
 
-        {!loading && availableRange && prizes.length > 0 && !result && (
-          <div className="flex flex-col items-center gap-6">
-            <p className="text-sm text-center rounded-full px-4 py-2" style={{ backgroundColor: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}>
-              {ui.drawUnlocked} {availableRange.min}-{availableRange.max} kg 🎉
-            </p>
+        {/* Roue */}
+        {!loading && !done && !noDrawPossible && (
+          <div className="flex flex-col items-center gap-5">
+            {pending ? (
+              <p className="text-sm text-center rounded-full px-4 py-2" style={{ backgroundColor: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}>
+                {ui.attempt} {attempts} {ui.of} {MAX_ATTEMPTS}
+              </p>
+            ) : (
+              <p className="text-sm text-center rounded-full px-4 py-2" style={{ backgroundColor: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}>
+                {ui.drawUnlocked} {availableRange.min}-{availableRange.max} kg 🎉
+              </p>
+            )}
 
             <div className="relative" style={{ width: 260, height: 260 }}>
               <div
@@ -166,17 +235,58 @@ export default function WheelScreen({ setScreen }) {
               />
             </div>
 
+            {/* Résultat provisoire */}
+            {currentPrize && !spinning && (
+              <div className="w-full rounded-xl p-4 text-center flex flex-col items-center gap-2" style={{ backgroundColor: `${GOLD}14`, border: `1px solid ${GOLD}44` }}>
+                {currentPrize.photoFileId && (
+                  <img src={photoUrl(currentPrize.photoFileId)} alt="" className="w-20 h-20 rounded-lg object-cover" />
+                )}
+                <p className="font-semibold" style={{ color: GOLD }}>{currentPrize.label}</p>
+                <p className="text-xs" style={{ color: MUTED }}>
+                  {canRetry ? ui.confirmWarning : ui.lastAttempt}
+                </p>
+              </div>
+            )}
+
             {error && <p className="text-xs text-center" style={{ color: "#E07A5F" }}>{error}</p>}
 
-            <button
-              onClick={handleSpin}
-              disabled={spinning}
-              className="flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold disabled:opacity-60"
-              style={{ backgroundColor: GOLD, color: INK }}
-            >
-              <Sparkles size={16} />
-              {spinning ? ui.spinning : ui.spinWheel}
-            </button>
+            {/* Boutons d'action */}
+            {!currentPrize && (
+              <button
+                onClick={handleSpin}
+                disabled={spinning}
+                className="flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold disabled:opacity-60"
+                style={{ backgroundColor: GOLD, color: INK }}
+              >
+                <Sparkles size={16} />
+                {spinning ? ui.spinning : ui.spinWheel}
+              </button>
+            )}
+
+            {currentPrize && !spinning && (
+              <div className="flex flex-col gap-2 w-full">
+                <button
+                  onClick={handleConfirm}
+                  disabled={confirming}
+                  className="flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold disabled:opacity-60"
+                  style={{ backgroundColor: GOLD, color: INK }}
+                >
+                  <Check size={16} />
+                  {confirming ? ui.confirming : ui.confirmSpin}
+                </button>
+
+                {canRetry && (
+                  <button
+                    onClick={handleSpin}
+                    disabled={spinning || confirming}
+                    className="flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold disabled:opacity-60"
+                    style={{ border: `1px solid ${CREAM}4D`, color: CREAM }}
+                  >
+                    <RotateCcw size={16} /> {ui.retrySpin}
+                  </button>
+                )}
+              </div>
+            )}
 
             <div className="w-full flex flex-col gap-1">
               {prizes.map((p, i) => (
@@ -186,25 +296,6 @@ export default function WheelScreen({ setScreen }) {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {result && (
-          <div className="rounded-2xl p-6 text-center flex flex-col items-center gap-3" style={panel}>
-            <Sparkles size={32} color={GOLD} />
-            <p className="text-lg font-semibold">{ui.congrats}</p>
-            {result.photoFileId && (
-              <img src={photoUrl(result.photoFileId)} alt={result.label} className="w-32 h-32 rounded-xl object-cover" />
-            )}
-            <p style={{ color: GOLD }}>{result.label}</p>
-            <p className="text-xs" style={{ color: MUTED }}>{ui.contactRep}</p>
-            <button
-              onClick={() => setScreen("dashboard")}
-              className="rounded-full px-6 py-2.5 text-sm font-semibold mt-2"
-              style={{ backgroundColor: GOLD, color: INK }}
-            >
-              {ui.backToDashboard}
-            </button>
           </div>
         )}
       </div>
