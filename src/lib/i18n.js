@@ -82,6 +82,17 @@ export const UI = {
     notifications: "Notifications",
     noNotifications: "Aucune notification pour le moment.",
     markAllRead: "Tout marquer comme lu",
+
+    historyEyebrow: "Notre histoire",
+    historyTitle: "Une passion transmise depuis 1929",
+    historyText: "Depuis 1929, une recette secrète de torréfaction se transmet avec passion, de génération en génération. En 2016, TOP MARK Distribution sarl est née pour porter cet héritage plus loin : sélection rigoureuse des grains, torréfaction artisanale et conditionnement moderne, au service des cafés et restaurants du Maroc.",
+    since1929: "1929",
+    since1929Label: "Recette secrète",
+    since2016: "2016",
+    since2016Label: "Distribution moderne",
+    imgFields: "Nos plantations",
+    imgBeans: "Nos grains sélectionnés",
+    imgRoasting: "Notre torréfaction",
   },
 
   ar: {
@@ -162,6 +173,17 @@ export const UI = {
     notifications: "الإشعارات",
     noNotifications: "لا توجد إشعارات حالياً.",
     markAllRead: "تعليم الكل كمقروء",
+
+    historyEyebrow: "قصتنا",
+    historyTitle: "شغف متوارث منذ 1929",
+    historyText: "منذ 1929، تتوارث وصفة سرية للتحميص بشغف، جيلاً بعد جيل. في 2016، وُلدت توب مارك للتوزيع لتحمل هذا الإرث أبعد: انتقاء دقيق للحبوب، تحميص تقليدي وتعليب عصري، في خدمة المقاهي والمطاعم بالمغرب.",
+    since1929: "1929",
+    since1929Label: "وصفة سرية",
+    since2016: "2016",
+    since2016Label: "توزيع عصري",
+    imgFields: "مزارعنا",
+    imgBeans: "حبوبنا المنتقاة",
+    imgRoasting: "تحميصنا",
   },
 
   zgh: {
@@ -242,6 +264,17 @@ export const UI = {
     notifications: "ⵉⵎⵎⵓⵔⴰⵜⵏ",
     noNotifications: "ⵓⵔ ⵍⵍⵉⵏ ⵉⵎⵎⵓⵔⴰⵜⵏ ⴷⵖⵉ.",
     markAllRead: "ⵔⴰ ⵎⴰⵕⵕⴰ ⵉⵜⵜⵓⵖⵕⴰⵏ",
+
+    historyEyebrow: "ⴰⵎⵣⵔⵓⵢ ⵏⵏⵖ",
+    historyTitle: "ⴰⵣⵣⵓⵍ ⵢⵜⵜⵓⵔⴰⵜⵏ ⵙⴳ 1929",
+    historyText: "ⵙⴳ 1929, ⵜⴰⵜⵉⴽⵍⵜ ⵜⵓⴼⴼⵉⵔⵜ ⵏ ⵓⵙⵔⴳⵎ ⵜⵜⵓⵔⴰⵜⵏⵜ ⵙ ⵓⵣⵣⵓⵍ, ⵙⴳ ⴷⵣⵢⵔⵜ ⵖⵔ ⵜⵉⵙ. ⴳ 2016, ⵜⵍⵓⵍ ⵜⵓⴱ ⵎⴰⵔⴽ ⴰⴼⴰⴷ ⴰⴷ ⵜⴰⵡⵢ ⴰⵜⵜⵔⴰⵜ ⴰⴷ ⵏⵏⵓⴳⴰⵔ: ⴰⴼⵔⴰⵏ ⵓⵛⵔⵉⴽ ⵏ ⵢⵉⵖⵙⴰⵏ, ⴰⵙⵔⴳⵎ ⴰⵃⵔⴼⵉ ⴷ ⵓⵣⴱⴱⴹ ⴰⵎⴰⵢⵏⵓ, ⵉ ⵜⵡⵓⵔⵉ ⵏ ⵉⴽⴰⴼⵉⵢⵏ ⴷ ⵎⴰⵕⵕⴰ ⵜⵉⵎⴰⵜⵎⴰⴽ ⴷⴳ ⵍⵎⵖⵔⵉⴱ.",
+    since1929: "1929",
+    since1929Label: "ⵜⴰⵜⵉⴽⵍⵜ ⵜⵓⴼⴼⵉⵔⵜ",
+    since2016: "2016",
+    since2016Label: "ⴰⵣⴱⴱⴹ ⴰⵎⴰⵢⵏⵓ",
+    imgFields: "ⵜⵉⴳⵎⵎⵉ ⵏⵏⵖ",
+    imgBeans: "ⵉⵖⵙⴰⵏ ⵏⵏⵖ ⵉⵜⵜⵓⴼⵔⴰⵏⵏ",
+    imgRoasting: "ⴰⵙⵔⴳⵎ ⵏⵏⵖ",
   },
 };
 
