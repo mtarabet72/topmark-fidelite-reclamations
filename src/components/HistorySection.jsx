@@ -7,7 +7,7 @@ import { HISTORY_IMAGES, brandImageUrl } from "../lib/brandImages.js";
 function PhotoSlot({ fileId, label, Icon }) {
   const url = brandImageUrl(fileId);
   return (
-    <div className="flex-1 min-w-[120px]">
+    <div className="flex-1 min-w-0">
       <div
         className="w-full aspect-square rounded-2xl overflow-hidden flex items-center justify-center relative"
         style={{
