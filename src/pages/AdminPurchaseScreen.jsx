@@ -60,8 +60,11 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
               <ArrowLeft size={16} /> Retour au tableau de bord
             </button>
           )}
-          <div className="flex gap-2 flex-wrap">
-            <button onClick={() => setScreen("admin-complaints")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${BRONZE}88`, color: BRONZE }}>
+         <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setScreen("admin-clients")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+              Clients
+            </button>
+            <button onClick={() => setScreen("admin-complaints")}
               Réclamations
             </button>
             <button onClick={() => setScreen("admin-spins")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
