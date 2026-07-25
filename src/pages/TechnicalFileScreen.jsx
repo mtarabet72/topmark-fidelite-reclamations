@@ -4,6 +4,7 @@ import { useAuth } from "../lib/AuthContext.jsx";
 import { equipmentLabel } from "../lib/history.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
+import LangToggle from "../components/LangToggle.jsx";
 
 const EQUIPMENT_TYPES = ["presse_cafe", "moulin_barista", "moulin_vrac", "machine_espresso", "autre"];
 
@@ -53,6 +54,10 @@ export default function TechnicalFileScreen() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
+        <div className="flex justify-end mb-4">
+          <LangToggle />
+        </div>
+
         <div className="rounded-2xl p-6" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}33` }}>
           <h1 className="text-xl font-semibold mb-1">{ui.technicalFile}</h1>
           <p className="text-sm mb-5" style={{ color: MUTED }}>{ui.technicalFileIntro}</p>
