@@ -78,6 +78,10 @@ export const UI = {
     confirmWarning: "En confirmant, votre solde sera remis à zéro.",
     pendingSpin: "Vous avez un tirage en attente de confirmation.",
     lastAttempt: "Dernier essai — vous devez confirmer ce lot.",
+
+    notifications: "Notifications",
+    noNotifications: "Aucune notification pour le moment.",
+    markAllRead: "Tout marquer comme lu",
   },
 
   ar: {
@@ -154,6 +158,10 @@ export const UI = {
     confirmWarning: "بالتأكيد، سيُصفَّر رصيدكم.",
     pendingSpin: "لديكم قرعة في انتظار التأكيد.",
     lastAttempt: "المحاولة الأخيرة — يجب تأكيد هذه الجائزة.",
+
+    notifications: "الإشعارات",
+    noNotifications: "لا توجد إشعارات حالياً.",
+    markAllRead: "تعليم الكل كمقروء",
   },
 
   zgh: {
@@ -230,6 +238,10 @@ export const UI = {
     confirmWarning: "ⵎⴽ ⵜⵙⵏⵜⵎⵎ, ⴰⴳⵎⴰⵎ ⵏⵏⵓⵏ ⴰⴷ ⵢⵉⵍⵉ ⴷ ⴰⵎⵢⴰ.",
     pendingSpin: "ⵍⵍⴰⵏ ⵖⵓⵔⵓⵏ ⴰⴼⵕⴰⴷ ⵉⵜⵜⵔⴰⵊⵓⵏ ⴰⵙⵏⵜⵎ.",
     lastAttempt: "ⴰⵔⵎ ⴰⵏⴳⴳⴰⵔⵓ — ⵉⵇⵇⴰⵏ ⴷ ⴰⴷ ⵜⵙⵏⵜⵎⵎ ⵜⴰⵔⵣⵣⵉⴼⵜ ⴰⴷ.",
+
+    notifications: "ⵉⵎⵎⵓⵔⴰⵜⵏ",
+    noNotifications: "ⵓⵔ ⵍⵍⵉⵏ ⵉⵎⵎⵓⵔⴰⵜⵏ ⴷⵖⵉ.",
+    markAllRead: "ⵔⴰ ⵎⴰⵕⵕⴰ ⵉⵜⵜⵓⵖⵕⴰⵏ",
   },
 };
 
