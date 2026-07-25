@@ -10,9 +10,11 @@ import {
   STATUS_LABELS,
 } from "../lib/complaints.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
+import { useUI } from "../lib/i18n.js";
 
 export default function ComplaintsScreen({ setScreen }) {
   const { t, lang } = useLang();
+  const ui = useUI(lang);
   const { user } = useAuth();
 
   const [categories, setCategories] = useState([]);
@@ -58,7 +60,7 @@ export default function ComplaintsScreen({ setScreen }) {
       setFiles([]);
       refresh();
     } catch (err) {
-      setError(err.message || "Erreur lors de l'envoi.");
+      setError(err.message || ui.errorOccurred);
     } finally {
       setSubmitting(false);
     }
@@ -70,7 +72,7 @@ export default function ComplaintsScreen({ setScreen }) {
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
         <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-          <ArrowLeft size={16} /> {t.nav.home}
+          <ArrowLeft size={16} /> {ui.backToDashboard}
         </button>
 
         <div className="flex items-center justify-between mb-5">
@@ -81,7 +83,7 @@ export default function ComplaintsScreen({ setScreen }) {
               className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold"
               style={{ backgroundColor: GOLD, color: INK }}
             >
-              <Plus size={16} /> Nouvelle
+              <Plus size={16} /> {ui.newBtn}
             </button>
           )}
         </div>
@@ -89,7 +91,7 @@ export default function ComplaintsScreen({ setScreen }) {
         {showForm && (
           <div className="rounded-2xl p-5 mb-6" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}44` }}>
             <div className="flex items-center justify-between mb-4">
-              <p className="font-semibold">Nouvelle réclamation</p>
+              <p className="font-semibold">{ui.newComplaint}</p>
               <button onClick={() => setShowForm(false)}><X size={18} color={MUTED} /></button>
             </div>
 
@@ -109,7 +111,7 @@ export default function ComplaintsScreen({ setScreen }) {
               <textarea
                 required
                 rows={4}
-                placeholder="Décrivez le problème..."
+                placeholder={ui.describeProblem}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="rounded-lg px-3 py-2.5 text-sm resize-none"
@@ -120,7 +122,7 @@ export default function ComplaintsScreen({ setScreen }) {
                 className="flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm cursor-pointer"
                 style={{ border: `1px dashed ${GOLD}66`, color: GOLD }}
               >
-                <Paperclip size={16} /> Ajouter des photos
+                <Paperclip size={16} /> {ui.addPhotos}
                 <input type="file" accept="image/*" multiple onChange={addFiles} className="hidden" />
               </label>
 
@@ -145,18 +147,18 @@ export default function ComplaintsScreen({ setScreen }) {
               {error && <p className="text-xs" style={{ color: "#E07A5F" }}>{error}</p>}
 
               <button type="submit" disabled={submitting} className="rounded-full px-5 py-2.5 text-sm font-semibold disabled:opacity-60" style={{ backgroundColor: GOLD, color: INK }}>
-                {submitting ? "Envoi…" : "Envoyer la réclamation"}
+                {submitting ? ui.sending : ui.sendComplaint}
               </button>
             </form>
           </div>
         )}
 
-        {loading && <p className="text-sm" style={{ color: MUTED }}>Chargement…</p>}
+        {loading && <p className="text-sm" style={{ color: MUTED }}>{ui.loading}</p>}
 
         {!loading && complaints.length === 0 && !showForm && (
           <div className="rounded-2xl p-6 text-center" style={{ backgroundColor: PANEL, border: `1px solid ${CREAM}1A` }}>
             <MessageSquareWarning size={28} color={MUTED} className="mx-auto mb-2" />
-            <p className="text-sm" style={{ color: MUTED }}>Aucune réclamation pour le moment.</p>
+            <p className="text-sm" style={{ color: MUTED }}>{ui.noComplaints}</p>
           </div>
         )}
 
@@ -185,13 +187,13 @@ export default function ComplaintsScreen({ setScreen }) {
 
                 {c.adminResponse && (
                   <div className="rounded-lg p-3 mt-2" style={{ backgroundColor: `${GOLD}14`, border: `1px solid ${GOLD}33` }}>
-                    <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: GOLD }}>Réponse TOP MARK</p>
+                    <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: GOLD }}>{ui.topmarkResponse}</p>
                     <p className="text-sm">{c.adminResponse}</p>
                   </div>
                 )}
 
                 <p className="text-xs mt-2" style={{ color: MUTED }}>
-                  {new Date(c.$createdAt).toLocaleDateString("fr-FR")}
+                  {new Date(c.$createdAt).toLocaleDateString(lang === "ar" ? "ar-MA" : "fr-FR")}
                 </p>
               </div>
             );
