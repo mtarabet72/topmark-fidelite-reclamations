@@ -218,6 +218,10 @@ function AppShell({ setScreen }) {
       <header className="flex items-center justify-between px-5 py-4 md:px-10" style={{ borderBottom: `1px solid ${GOLD}26` }}>
         <div className="flex items-center gap-3">
           <img src="/logo-header.png" alt="TOP MARK" style={{ height: 40, width: "auto" }} />
+          <div className="flex flex-col leading-none">
+            <span className="text-lg font-bold tracking-wide" style={{ color: "#FFFFFF" }}>{t.appName}</span>
+            <span className="text-[10px] italic" style={{ color: GOLD }}>{t.tagline}</span>
+          </div>
         </div>
         <LangToggle />
       </header>
