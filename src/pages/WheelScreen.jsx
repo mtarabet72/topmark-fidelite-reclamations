@@ -19,7 +19,7 @@ const SLICE_COLORS = [GOLD, BRONZE];
 export default function WheelScreen({ setScreen }) {
   const { t, lang } = useLang();
   const ui = useUI(lang);
-  const { user, profile } = useAuth();
+  const { user, profile, refreshSession } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [availableRange, setAvailableRange] = useState(null);
@@ -28,11 +28,14 @@ export default function WheelScreen({ setScreen }) {
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [balance, setBalance] = useState(profile?.loyaltyPoints || 0);
 
   async function load() {
     setLoading(true);
     const spins = await listClientSpins(user.$id);
     const points = profile?.loyaltyPoints || 0;
+    setBalance(points);
     const range = findAvailableRange(points, spins);
     setAvailableRange(range);
     if (range) {
@@ -48,24 +51,42 @@ export default function WheelScreen({ setScreen }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleSpin() {
-    if (spinning || prizes.length === 0) return;
+  async function handleSpin() {
+    if (spinning || prizes.length === 0 || !profile) return;
+    setError("");
+    setSpinning(true);
+
     const winner = drawPrize(prizes);
+
+    // Le tirage est enregistré et les points déduits AVANT l'animation :
+    // impossible de rejouer ce palier, même en fermant l'application.
+    let newBalance;
+    try {
+      newBalance = await recordSpin({
+        client: profile,
+        prize: winner,
+        thresholdPoints: availableRange.min,
+      });
+    } catch (err) {
+      setSpinning(false);
+      setError(err.message || ui.errorOccurred);
+      return;
+    }
+
+    setBalance(newBalance);
+
     const winnerIndex = prizes.findIndex((p) => p.$id === winner.$id);
     const anglePerSlice = 360 / prizes.length;
     const landingAngle = 360 - (winnerIndex * anglePerSlice + anglePerSlice / 2);
     const extraSpins = 6 * 360;
     const current = rotation % 360;
     const delta = ((landingAngle - current) % 360 + 360) % 360;
-    const newRotation = rotation + extraSpins + delta;
+    setRotation(rotation + extraSpins + delta);
 
-    setSpinning(true);
-    setRotation(newRotation);
-
-    setTimeout(async () => {
-      await recordSpin({ clientId: user.$id, prize: winner, thresholdPoints: availableRange.min });
+    setTimeout(() => {
       setResult(winner);
       setSpinning(false);
+      if (refreshSession) refreshSession();
     }, 4200);
   }
 
@@ -84,7 +105,7 @@ export default function WheelScreen({ setScreen }) {
 
         <h1 className="text-xl font-semibold mb-1 text-center">{ui.tombolaTitle}</h1>
         <p className="text-sm mb-6 text-center" style={{ color: MUTED }}>
-          {ui.currentBalance} : <strong style={{ color: GOLD }}>{profile?.loyaltyPoints || 0} {ui.kgCumulated}</strong>
+          {ui.currentBalance} : <strong style={{ color: GOLD }}>{balance} {ui.kgCumulated}</strong>
         </p>
 
         {loading && <p className="text-sm text-center" style={{ color: MUTED }}>{ui.loading}</p>}
@@ -98,7 +119,7 @@ export default function WheelScreen({ setScreen }) {
             </p>
             {!availableRange && nextLocked ? (
               <p className="text-sm" style={{ color: MUTED }}>
-                {ui.stillNeed} <strong style={{ color: GOLD }}>{nextLocked.min - (profile?.loyaltyPoints || 0)} kg</strong> {ui.toUnlock} ({nextLocked.min}–{nextLocked.max} kg).
+                {ui.stillNeed} <strong style={{ color: GOLD }}>{nextLocked.min - balance} kg</strong> {ui.toUnlock} ({nextLocked.min}–{nextLocked.max} kg).
               </p>
             ) : !availableRange ? (
               <p className="text-sm" style={{ color: MUTED }}>{ui.allTiersReached}</p>
@@ -144,6 +165,8 @@ export default function WheelScreen({ setScreen }) {
                 }}
               />
             </div>
+
+            {error && <p className="text-xs text-center" style={{ color: "#E07A5F" }}>{error}</p>}
 
             <button
               onClick={handleSpin}
