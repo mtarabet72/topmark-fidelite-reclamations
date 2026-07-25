@@ -13,6 +13,7 @@ import AdminComplaintsScreen from "./pages/AdminComplaintsScreen.jsx";
 import HistoryScreen from "./pages/HistoryScreen.jsx";
 import AdminClientsScreen from "./pages/AdminClientsScreen.jsx";
 import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
+import InstallPrompt from "./components/InstallPrompt.jsx";
 
 const translations = {
   fr: {
@@ -248,6 +249,10 @@ function AppShell({ setScreen }) {
         <div className="mt-4">
           <StatusBadges />
         </div>
+      </section>
+
+      <section className="px-6 pb-4 max-w-3xl mx-auto w-full">
+        <InstallPrompt />
       </section>
 
       <section className="px-6 pb-24 md:pb-16 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
