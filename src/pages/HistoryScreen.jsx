@@ -5,6 +5,7 @@ import { listTransactions, listEquipment, equipmentLabel } from "../lib/history.
 import { listClientSpins, listAllPrizes, photoUrl } from "../lib/tombola.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
+import LangToggle from "../components/LangToggle.jsx";
 
 export default function HistoryScreen({ setScreen }) {
   const { t, lang } = useLang();
@@ -49,9 +50,12 @@ export default function HistoryScreen({ setScreen }) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
-        <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-          <ArrowLeft size={16} /> {ui.backToDashboard}
-        </button>
+        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm" style={{ color: MUTED }}>
+            <ArrowLeft size={16} /> {ui.backToDashboard}
+          </button>
+          <LangToggle />
+        </div>
 
         <h1 className="text-xl font-semibold mb-1">{ui.myHistory}</h1>
         <p className="text-sm mb-5" style={{ color: MUTED }}>
