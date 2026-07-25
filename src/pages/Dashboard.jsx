@@ -5,6 +5,7 @@ import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js
 import { useUI } from "../lib/i18n.js";
 import LangToggle from "../components/LangToggle.jsx";
 import InstallPrompt from "../components/InstallPrompt.jsx";
+import NotificationBell from "../components/NotificationBell.jsx";
 
 export default function Dashboard({ setScreen }) {
   const { t, lang } = useLang();
@@ -20,6 +21,7 @@ export default function Dashboard({ setScreen }) {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <LangToggle />
+          <NotificationBell setScreen={setScreen} />
           {isAdmin && (
             <button
               onClick={() => setScreen("admin")}
