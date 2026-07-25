@@ -4,6 +4,7 @@ import { useAuth } from "../lib/AuthContext.jsx";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
 import LangToggle from "../components/LangToggle.jsx";
+import InstallPrompt from "../components/InstallPrompt.jsx";
 
 export default function Dashboard({ setScreen }) {
   const { t, lang } = useLang();
@@ -35,6 +36,8 @@ export default function Dashboard({ setScreen }) {
       </header>
 
       <main className="px-6 py-8 max-w-3xl mx-auto w-full flex flex-col gap-6">
+        <InstallPrompt />
+
         <div className="rounded-2xl p-6 flex items-center justify-between gap-3 flex-wrap" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}44` }}>
           <div>
             <p className="text-sm" style={{ color: MUTED }}>{ui.currentBalance}</p>
