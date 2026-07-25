@@ -69,6 +69,15 @@ export const UI = {
     installApp: "Installer l'application",
     installHint: "Accès rapide depuis votre écran d'accueil",
     installIosHint: "Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil »",
+
+    attempt: "Essai",
+    of: "sur",
+    retrySpin: "Retenter ma chance",
+    confirmSpin: "Confirmer ce lot",
+    confirming: "Confirmation…",
+    confirmWarning: "En confirmant, votre solde sera remis à zéro.",
+    pendingSpin: "Vous avez un tirage en attente de confirmation.",
+    lastAttempt: "Dernier essai — vous devez confirmer ce lot.",
   },
 
   ar: {
@@ -136,6 +145,15 @@ export const UI = {
     installApp: "تثبيت التطبيق",
     installHint: "وصول سريع من شاشتكم الرئيسية",
     installIosHint: "على الآيفون: زر المشاركة، ثم « إضافة إلى الشاشة الرئيسية »",
+
+    attempt: "محاولة",
+    of: "من",
+    retrySpin: "إعادة المحاولة",
+    confirmSpin: "تأكيد هذه الجائزة",
+    confirming: "جارٍ التأكيد…",
+    confirmWarning: "بالتأكيد، سيُصفَّر رصيدكم.",
+    pendingSpin: "لديكم قرعة في انتظار التأكيد.",
+    lastAttempt: "المحاولة الأخيرة — يجب تأكيد هذه الجائزة.",
   },
 
   zgh: {
@@ -203,6 +221,15 @@ export const UI = {
     installApp: "ⵙⴱⴷⴷ ⴰⵙⵏⴼⴰⵔ",
     installHint: "ⴰⴽⵛⵛⵓⵎ ⴰⵔⵓⵔⴰⵏ ⵙⴳ ⵓⴳⴷⵉⵍ ⵏⵏⵓⵏ",
     installIosHint: "ⵅⴼ ⵉⴼⵓⵏ: ⵜⴰⵇⴰⵕⵉⴹⵜ ⵏ ⵓⴱⴹⴹⵓ, ⴷⴼⴼⵉⵔ « ⵖⵔ ⵓⴳⴷⵉⵍ ⴰⵎⵣⵡⴰⵔⵓ »",
+
+    attempt: "ⴰⵔⵎ",
+    of: "ⵙⴳ",
+    retrySpin: "ⴰⵔⵎ ⴷⴰⵖ",
+    confirmSpin: "ⵙⵏⵜⵎ ⵜⴰⵔⵣⵣⵉⴼⵜ ⴰⴷ",
+    confirming: "ⵉⵜⵜⵓⵙⵏⵜⴰⵎ…",
+    confirmWarning: "ⵎⴽ ⵜⵙⵏⵜⵎⵎ, ⴰⴳⵎⴰⵎ ⵏⵏⵓⵏ ⴰⴷ ⵢⵉⵍⵉ ⴷ ⴰⵎⵢⴰ.",
+    pendingSpin: "ⵍⵍⴰⵏ ⵖⵓⵔⵓⵏ ⴰⴼⵕⴰⴷ ⵉⵜⵜⵔⴰⵊⵓⵏ ⴰⵙⵏⵜⵎ.",
+    lastAttempt: "ⴰⵔⵎ ⴰⵏⴳⴳⴰⵔⵓ — ⵉⵇⵇⴰⵏ ⴷ ⴰⴷ ⵜⵙⵏⵜⵎⵎ ⵜⴰⵔⵣⵣⵉⴼⵜ ⴰⴷ.",
   },
 };
 
