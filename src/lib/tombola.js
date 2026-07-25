@@ -70,16 +70,52 @@ export function drawPrize(prizes) {
   return prizes[prizes.length - 1];
 }
 
-export async function recordSpin({ clientId, prize, thresholdPoints }) {
+/**
+ * Enregistre le tirage ET déduit les points immédiatement.
+ * Appelé AVANT l'animation : le résultat est verrouillé, impossible de rejouer.
+ */
+export async function recordSpin({ client, prize, thresholdPoints }) {
+  // 1. Verrouiller le tirage
   await databases.createDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, ID.unique(), {
-    clientId,
+    clientId: client.userId,
     prizeId: prize.$id,
     thresholdPoints,
     spunAt: new Date().toISOString(),
+    delivered: false,
   });
+
+  // 2. Déduire les points du palier
+  const newBalance = Math.max((client.loyaltyPoints || 0) - thresholdPoints, 0);
+
+  await databases.updateDocument(DATABASE_ID, COLLECTIONS.CLIENTS, client.$id, {
+    loyaltyPoints: newBalance,
+  });
+
+  // 3. Tracer le mouvement dans l'historique
+  await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
+    clientId: client.userId,
+    type: "roue",
+    points: -thresholdPoints,
+    reason: `Tirage tombola (palier ${thresholdPoints} kg)`,
+  });
+
+  return newBalance;
 }
 
-// ---------- Côté admin (gestion du catalogue) ----------
+// ---------- Côté admin ----------
+
+export async function listAllSpins() {
+  const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, [
+    Query.orderDesc("spunAt"),
+    Query.limit(200),
+  ]);
+  return res.documents;
+}
+
+// Marque simplement la remise physique — les points ont déjà été déduits au tirage
+export async function markSpinDelivered(spinId, delivered) {
+  return databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spinId, { delivered });
+}
 
 export async function listAllPrizes() {
   const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.WHEEL_PRIZES, [
@@ -111,40 +147,4 @@ export async function updatePrize(prizeId, data) {
 
 export async function deletePrize(prizeId) {
   return databases.deleteDocument(DATABASE_ID, COLLECTIONS.WHEEL_PRIZES, prizeId);
-}
-
-// Liste tous les tirages, du plus récent au plus ancien (vue admin)
-export async function listAllSpins() {
-  const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, [
-    Query.orderDesc("spunAt"),
-    Query.limit(200),
-  ]);
-  return res.documents;
-}
-
-export async function markSpinDelivered(spinId, delivered, client = null) {
-  const spin = await databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spinId, {
-    delivered,
-  });
-
-  // À la remise du lot, on déduit le seuil du palier des points du client
-  if (delivered && client) {
-    const deduction = spin.thresholdPoints || 0;
-    const newBalance = Math.max((client.loyaltyPoints || 0) - deduction, 0);
-
-    await databases.updateDocument(DATABASE_ID, COLLECTIONS.CLIENTS, client.$id, {
-      loyaltyPoints: newBalance,
-    });
-
-    await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
-      clientId: client.userId,
-      type: "roue",
-      points: -deduction,
-      reason: `Lot remis (palier ${deduction} kg)`,
-    });
-
-    return { spin, newBalance };
-  }
-
-  return { spin, newBalance: client?.loyaltyPoints ?? null };
 }
