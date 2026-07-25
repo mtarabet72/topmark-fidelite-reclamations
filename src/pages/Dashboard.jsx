@@ -1,8 +1,7 @@
 import React from "react";
-import { Gift, MessageSquareWarning, LogOut, ShieldCheck } from "lucide-react";
+import { Gift, MessageSquareWarning, LogOut, ShieldCheck, History } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
-import { Gift, MessageSquareWarning, LogOut, ShieldCheck, History } from "lucide-react";
 
 export default function Dashboard({ setScreen }) {
   const { t } = useLang();
