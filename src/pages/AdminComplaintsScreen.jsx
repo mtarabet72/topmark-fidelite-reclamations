@@ -9,6 +9,7 @@ import {
   STATUS_LABELS,
 } from "../lib/complaints.js";
 import { listClients } from "../lib/purchases.js";
+import { createNotification } from "../lib/notifications.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 const STATUS_ORDER = ["nouveau", "en_cours", "resolu", "rejete"];
@@ -43,6 +44,20 @@ export default function AdminComplaintsScreen({ setScreen }) {
   async function handleStatusChange(complaint, newStatus) {
     await updateComplaint(complaint.$id, { status: newStatus });
     setComplaints((prev) => prev.map((c) => (c.$id === complaint.$id ? { ...c, status: newStatus } : c)));
+
+    const st = STATUS_LABELS[newStatus];
+    try {
+      await createNotification({
+        clientId: complaint.clientId,
+        titleFr: `Votre réclamation est maintenant : ${st.fr}`,
+        titleAr: `أصبحت شكايتكم الآن: ${st.ar}`,
+        titleZgh: `ⵜⵉⵖⵓⵔⵉ ⵏⵏⵓⵏ ⴷⵖⵉ: ${st.zgh}`,
+        relatedType: "complaint",
+        relatedId: complaint.$id,
+      });
+    } catch (err) {
+      console.error("Notification statut non envoyée :", err);
+    }
   }
 
   async function handleSaveResponse(complaint) {
@@ -56,6 +71,20 @@ export default function AdminComplaintsScreen({ setScreen }) {
       delete next[complaint.$id];
       return next;
     });
+
+    try {
+      await createNotification({
+        clientId: complaint.clientId,
+        titleFr: "TOP MARK a répondu à votre réclamation.",
+        titleAr: "ردت توب مارك على شكايتكم.",
+        titleZgh: "ⵜⵓⴱ ⵎⴰⵔⴽ ⵜⵔⵔⴰ ⵅⴼ ⵜⵖⵓⵔⵉ ⵏⵏⵓⵏ.",
+        relatedType: "complaint",
+        relatedId: complaint.$id,
+      });
+    } catch (err) {
+      console.error("Notification réponse non envoyée :", err);
+    }
+
     setSavingId(null);
   }
 
