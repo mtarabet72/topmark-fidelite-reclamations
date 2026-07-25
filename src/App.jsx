@@ -15,6 +15,7 @@ import AdminClientsScreen from "./pages/AdminClientsScreen.jsx";
 import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 import InstallPrompt from "./components/InstallPrompt.jsx";
 import NotificationsScreen from "./pages/NotificationsScreen.jsx";
+import HistorySection from "./components/HistorySection.jsx";
 const translations = {
   fr: {
     dir: "ltr",
@@ -211,7 +212,6 @@ function PlaceholderCard({ title, desc, icon: Icon, accent }) {
 
 function AppShell({ setScreen }) {
   const { t, lang } = useLang();
-  const [active, setActive] = useState("home");
 
   return (
     <div className="min-h-screen w-full flex flex-col" dir={t.dir} lang={lang} style={{ backgroundColor: INK, fontFamily: FONT_BY_LANG[lang], color: CREAM }}>
@@ -222,9 +222,6 @@ function AppShell({ setScreen }) {
             <span className="text-lg font-bold tracking-wide" style={{ fontFamily: DISPLAY_FONT_BY_LANG[lang], color: CREAM }}>{t.appName}</span>
             <span className="text-[10px] italic" style={{ color: GOLD }}>{t.tagline}</span>
           </div>
-        </div>
-        <div className="hidden md:block">
-          <NavShell active={active} setActive={setActive} />
         </div>
         <LangToggle />
       </header>
@@ -251,20 +248,16 @@ function AppShell({ setScreen }) {
         </div>
       </section>
 
-      <section className="px-6 pb-4 max-w-3xl mx-auto w-full">
-        <InstallPrompt />
-      </section>
+      <div style={{ borderTop: `1px solid ${GOLD}1A` }}>
+        <HistorySection />
+      </div>
 
-      <section className="px-6 pb-24 md:pb-16 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
+      <section className="px-6 pb-16 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto w-full" style={{ borderTop: `1px solid ${GOLD}1A`, paddingTop: "3.5rem" }}>
         <PlaceholderCard title={t.sections.loyaltyTitle} desc={t.sections.loyaltyDesc} icon={Gift} accent={GOLD} />
         <PlaceholderCard title={t.sections.claimsTitle} desc={t.sections.claimsDesc} icon={MessageSquareWarning} accent={BRONZE} />
       </section>
 
-      <footer className="hidden md:block text-center text-xs py-4" style={{ color: `${MUTED}99` }}>{t.footer}</footer>
-
-      <div className="md:hidden">
-        <NavShell active={active} setActive={setActive} />
-      </div>
+      <footer className="text-center text-xs py-4" style={{ color: `${MUTED}99` }}>{t.footer}</footer>
     </div>
   );
 }
