@@ -46,11 +46,12 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
 
   const inputStyle = { backgroundColor: INK, border: `1px solid ${CREAM}33`, color: CREAM };
   const previewPoints = kg ? Math.round(Number(kg)) : 0;
+  const navBtn = { border: `1px solid ${GOLD}55`, color: GOLD };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-lg">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
           {standalone ? (
             <button onClick={logout} className="flex items-center gap-2 text-sm" style={{ color: MUTED }}>
               Se déconnecter
@@ -60,17 +61,18 @@ export default function AdminPurchaseScreen({ setScreen, standalone = false }) {
               <ArrowLeft size={16} /> Retour au tableau de bord
             </button>
           )}
-         <div className="flex gap-2 flex-wrap">
-            <button onClick={() => setScreen("admin-clients")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setScreen("admin-clients")} className="text-sm rounded-full px-3 py-1.5" style={navBtn}>
               Clients
             </button>
-            <button onClick={() => setScreen("admin-complaints")}
+            <button onClick={() => setScreen("admin-complaints")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${BRONZE}88`, color: BRONZE }}>
               Réclamations
             </button>
-            <button onClick={() => setScreen("admin-spins")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+            <button onClick={() => setScreen("admin-spins")} className="text-sm rounded-full px-3 py-1.5" style={navBtn}>
               Tirages
             </button>
-            <button onClick={() => setScreen("admin-lots")} className="text-sm rounded-full px-3 py-1.5" style={{ border: `1px solid ${GOLD}55`, color: GOLD }}>
+            <button onClick={() => setScreen("admin-lots")} className="text-sm rounded-full px-3 py-1.5" style={navBtn}>
               Gérer les lots
             </button>
           </div>
