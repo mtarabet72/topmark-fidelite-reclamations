@@ -64,6 +64,11 @@ export const UI = {
     validateFile: "Valider ma fiche technique",
     logout: "Se déconnecter",
     errorOccurred: "Une erreur est survenue.",
+
+    // Installation PWA
+    installApp: "Installer l'application",
+    installHint: "Accès rapide depuis votre écran d'accueil",
+    installIosHint: "Sur iPhone : bouton Partager, puis « Sur l'écran d'accueil »",
   },
 
   ar: {
@@ -127,6 +132,10 @@ export const UI = {
     validateFile: "تأكيد البطاقة التقنية",
     logout: "تسجيل الخروج",
     errorOccurred: "حدث خطأ ما.",
+
+    installApp: "تثبيت التطبيق",
+    installHint: "وصول سريع من شاشتكم الرئيسية",
+    installIosHint: "على الآيفون: زر المشاركة، ثم « إضافة إلى الشاشة الرئيسية »",
   },
 
   zgh: {
@@ -190,6 +199,10 @@ export const UI = {
     validateFile: "ⵙⵏⵜⵎ ⵜⴰⴽⴰⵕⴹⴰ ⵜⴰⵜⵉⵇⵏⵉⵜ",
     logout: "ⴼⴼⵖ",
     errorOccurred: "ⵜⵍⵍⴰ ⵜⵣⴳⵍⵜ.",
+
+    installApp: "ⵙⴱⴷⴷ ⴰⵙⵏⴼⴰⵔ",
+    installHint: "ⴰⴽⵛⵛⵓⵎ ⴰⵔⵓⵔⴰⵏ ⵙⴳ ⵓⴳⴷⵉⵍ ⵏⵏⵓⵏ",
+    installIosHint: "ⵅⴼ ⵉⴼⵓⵏ: ⵜⴰⵇⴰⵕⵉⴹⵜ ⵏ ⵓⴱⴹⴹⵓ, ⴷⴼⴼⵉⵔ « ⵖⵔ ⵓⴳⴷⵉⵍ ⴰⵎⵣⵡⴰⵔⵓ »",
   },
 };
 
