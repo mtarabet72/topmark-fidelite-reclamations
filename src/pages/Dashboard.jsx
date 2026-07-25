@@ -2,6 +2,7 @@ import React from "react";
 import { Gift, MessageSquareWarning, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
+import { Gift, MessageSquareWarning, LogOut, ShieldCheck, History } from "lucide-react";
 
 export default function Dashboard({ setScreen }) {
   const { t } = useLang();
@@ -36,9 +37,13 @@ export default function Dashboard({ setScreen }) {
             <p className="text-sm" style={{ color: MUTED }}>Solde de points</p>
             <p className="text-4xl font-bold" style={{ color: GOLD }}>{profile ? profile.loyaltyPoints : "…"}</p>
           </div>
-          <div className="rounded-xl p-3" style={{ backgroundColor: `${GOLD}22` }}>
-            <Gift size={28} color={GOLD} />
-          </div>
+          <button
+            onClick={() => setScreen("history")}
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm"
+            style={{ backgroundColor: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}
+          >
+            <History size={16} /> Historique
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
