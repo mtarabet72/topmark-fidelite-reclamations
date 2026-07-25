@@ -48,16 +48,16 @@ export async function listClientSpins(clientId) {
   return res.documents;
 }
 
-export function findNextLockedRange(loyaltyPoints, spins) {
-  const claimedThresholds = new Set(spins.map((s) => s.thresholdPoints));
-  return RANGES.find((r) => !claimedThresholds.has(r.min) && loyaltyPoints < r.min) || null;
+// Chaque cycle (entre deux remises à zéro) est indépendant : seul le solde
+// actuel du client détermine le palier accessible, peu importe l'historique.
+export function findNextLockedRange(loyaltyPoints, _spins) {
+  return RANGES.find((r) => loyaltyPoints < r.min) || null;
 }
 
-export function findAvailableRange(loyaltyPoints, spins) {
-  const claimedThresholds = new Set(spins.map((s) => s.thresholdPoints));
-  const unlockedRanges = RANGES.filter((r) => loyaltyPoints >= r.min && !claimedThresholds.has(r.min));
-  if (unlockedRanges.length === 0) return null;
-  return unlockedRanges[unlockedRanges.length - 1];
+export function findAvailableRange(loyaltyPoints, _spins) {
+  const unlocked = RANGES.filter((r) => loyaltyPoints >= r.min);
+  if (unlocked.length === 0) return null;
+  return unlocked[unlocked.length - 1];
 }
 
 export function drawPrize(prizes) {
