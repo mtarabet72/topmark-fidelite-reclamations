@@ -14,7 +14,7 @@ import HistoryScreen from "./pages/HistoryScreen.jsx";
 import AdminClientsScreen from "./pages/AdminClientsScreen.jsx";
 import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 import InstallPrompt from "./components/InstallPrompt.jsx";
-
+import NotificationsScreen from "./pages/NotificationsScreen.jsx";
 const translations = {
   fr: {
     dir: "ltr",
@@ -334,6 +334,8 @@ export default function App() {
       content = <ComplaintsScreen setScreen={setScreen} />;
     } else if (screen === "history") {
       content = <HistoryScreen setScreen={setScreen} />;
+    } else if (screen === "notifications") {
+      content = <NotificationsScreen setScreen={setScreen} />;
     } else {
       content = <Dashboard setScreen={setScreen} />;
     }
