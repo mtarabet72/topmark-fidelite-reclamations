@@ -2,19 +2,23 @@ import React from "react";
 import { Gift, MessageSquareWarning, LogOut, ShieldCheck, History } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
+import { useUI } from "../lib/i18n.js";
+import LangToggle from "../components/LangToggle.jsx";
 
 export default function Dashboard({ setScreen }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const ui = useUI(lang);
   const { profile, user, isAdmin, logout } = useAuth();
 
   return (
     <div className="min-h-screen w-full flex flex-col" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
-      <header className="flex items-center justify-between px-5 py-4 md:px-10" style={{ borderBottom: `1px solid ${GOLD}26` }}>
+      <header className="flex items-center justify-between px-5 py-4 md:px-10 gap-3 flex-wrap" style={{ borderBottom: `1px solid ${GOLD}26` }}>
         <div>
           <p className="text-sm" style={{ color: MUTED }}>{t.hero.eyebrow}</p>
           <p className="text-lg font-semibold">{profile?.fullName || user?.name}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <LangToggle />
           {isAdmin && (
             <button
               onClick={() => setScreen("admin")}
@@ -31,9 +35,9 @@ export default function Dashboard({ setScreen }) {
       </header>
 
       <main className="px-6 py-8 max-w-3xl mx-auto w-full flex flex-col gap-6">
-        <div className="rounded-2xl p-6 flex items-center justify-between" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}44` }}>
+        <div className="rounded-2xl p-6 flex items-center justify-between gap-3 flex-wrap" style={{ backgroundColor: PANEL, border: `1px solid ${GOLD}44` }}>
           <div>
-            <p className="text-sm" style={{ color: MUTED }}>Solde de points</p>
+            <p className="text-sm" style={{ color: MUTED }}>{ui.currentBalance}</p>
             <p className="text-4xl font-bold" style={{ color: GOLD }}>{profile ? profile.loyaltyPoints : "…"}</p>
           </div>
           <button
@@ -41,7 +45,7 @@ export default function Dashboard({ setScreen }) {
             className="flex items-center gap-2 rounded-full px-4 py-2 text-sm"
             style={{ backgroundColor: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}
           >
-            <History size={16} /> Historique
+            <History size={16} /> {ui.myHistory}
           </button>
         </div>
 
@@ -67,7 +71,7 @@ export default function Dashboard({ setScreen }) {
         </div>
 
         {!profile && (
-          <p className="text-xs" style={{ color: MUTED }}>Profil client en cours de chargement…</p>
+          <p className="text-xs" style={{ color: MUTED }}>{ui.loading}</p>
         )}
       </main>
     </div>
