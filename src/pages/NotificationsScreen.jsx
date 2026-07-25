@@ -16,9 +16,15 @@ export default function NotificationsScreen({ setScreen }) {
 
   async function refresh() {
     setLoading(true);
-    const list = await listMyNotifications(user.$id);
-    setNotifs(list);
-    setLoading(false);
+    try {
+      const list = await listMyNotifications(user.$id);
+      setNotifs(list);
+    } catch (err) {
+      console.error("Erreur chargement notifications :", err);
+      setNotifs([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
