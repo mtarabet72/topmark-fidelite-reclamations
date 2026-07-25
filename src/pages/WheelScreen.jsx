@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, RotateCcw, Check } from "lucide-react";
+import { ArrowLeft, Sparkles, RotateCcw, Check, Gift } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import {
   listActivePrizesForRange,
@@ -19,6 +19,20 @@ import { useUI } from "../lib/i18n.js";
 import LangToggle from "../components/LangToggle.jsx";
 
 const SLICE_COLORS = [GOLD, BRONZE];
+const WHEEL_SIZE = 260;
+const IMG_SIZE = 56;
+const IMG_RADIUS = 85; // distance du centre à laquelle les images sont placées
+
+function sliceImagePosition(index, total) {
+  const anglePerSlice = 360 / total;
+  const midAngleDeg = anglePerSlice * index + anglePerSlice / 2;
+  const rad = (midAngleDeg * Math.PI) / 180;
+  const cx = WHEEL_SIZE / 2;
+  const cy = WHEEL_SIZE / 2;
+  const x = cx + IMG_RADIUS * Math.sin(rad) - IMG_SIZE / 2;
+  const y = cy - IMG_RADIUS * Math.cos(rad) - IMG_SIZE / 2;
+  return { left: x, top: y };
+}
 
 export default function WheelScreen({ setScreen }) {
   const { t, lang } = useLang();
@@ -29,8 +43,8 @@ export default function WheelScreen({ setScreen }) {
   const [availableRange, setAvailableRange] = useState(null);
   const [nextLocked, setNextLocked] = useState(null);
   const [prizes, setPrizes] = useState([]);
-  const [pending, setPending] = useState(null);      // tirage en attente de confirmation
-  const [currentPrize, setCurrentPrize] = useState(null); // lot affiché après animation
+  const [pending, setPending] = useState(null);
+  const [currentPrize, setCurrentPrize] = useState(null);
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -151,7 +165,6 @@ export default function WheelScreen({ setScreen }) {
 
         {loading && <p className="text-sm text-center" style={{ color: MUTED }}>{ui.loading}</p>}
 
-        {/* Écran final après confirmation */}
         {done && currentPrize && (
           <div className="rounded-2xl p-6 text-center flex flex-col items-center gap-3" style={panel}>
             <Sparkles size={32} color={GOLD} />
@@ -171,7 +184,6 @@ export default function WheelScreen({ setScreen }) {
           </div>
         )}
 
-        {/* Aucun tirage possible */}
         {!loading && !done && noDrawPossible && (
           <div className="rounded-2xl p-6 text-center" style={panel}>
             <p className="mb-2">
@@ -189,7 +201,6 @@ export default function WheelScreen({ setScreen }) {
           </div>
         )}
 
-        {/* Roue */}
         {!loading && !done && !noDrawPossible && (
           <div className="flex flex-col items-center gap-5">
             {pending ? (
@@ -202,9 +213,10 @@ export default function WheelScreen({ setScreen }) {
               </p>
             )}
 
-            <div className="relative" style={{ width: 260, height: 260 }}>
+            <div className="relative" style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}>
+              {/* Pointeur — fixe, ne tourne pas */}
               <div
-                className="absolute z-10"
+                className="absolute z-20"
                 style={{
                   top: -6,
                   left: "50%",
@@ -216,11 +228,13 @@ export default function WheelScreen({ setScreen }) {
                   borderTop: `18px solid ${CREAM}`,
                 }}
               />
+
+              {/* Roue — tourne avec ses images */}
               <div
-                className="rounded-full"
+                className="rounded-full relative"
                 style={{
-                  width: 260,
-                  height: 260,
+                  width: WHEEL_SIZE,
+                  height: WHEEL_SIZE,
                   transform: `rotate(${rotation}deg)`,
                   transition: spinning ? "transform 4.2s cubic-bezier(0.17, 0.67, 0.16, 0.99)" : "none",
                   background: `conic-gradient(${prizes
@@ -232,10 +246,38 @@ export default function WheelScreen({ setScreen }) {
                     .join(", ")})`,
                   border: `4px solid ${CREAM}33`,
                 }}
-              />
+              >
+                {prizes.map((p, i) => {
+                  const pos = sliceImagePosition(i, prizes.length);
+                  return (
+                    <div
+                      key={p.$id}
+                      className="absolute rounded-full overflow-hidden flex items-center justify-center"
+                      style={{
+                        left: pos.left,
+                        top: pos.top,
+                        width: IMG_SIZE,
+                        height: IMG_SIZE,
+                        border: `2px solid ${CREAM}CC`,
+                        backgroundColor: INK,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
+                      }}
+                    >
+                      {p.photoFileId ? (
+                        <img
+                          src={photoUrl(p.photoFileId)}
+                          alt={p.label}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Gift size={22} color={CREAM} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Résultat provisoire */}
             {currentPrize && !spinning && (
               <div className="w-full rounded-xl p-4 text-center flex flex-col items-center gap-2" style={{ backgroundColor: `${GOLD}14`, border: `1px solid ${GOLD}44` }}>
                 {currentPrize.photoFileId && (
@@ -250,7 +292,6 @@ export default function WheelScreen({ setScreen }) {
 
             {error && <p className="text-xs text-center" style={{ color: "#E07A5F" }}>{error}</p>}
 
-            {/* Boutons d'action */}
             {!currentPrize && (
               <button
                 onClick={handleSpin}
