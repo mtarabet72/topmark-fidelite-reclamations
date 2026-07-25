@@ -8,11 +8,12 @@ import AdminPurchaseScreen from "./pages/AdminPurchaseScreen.jsx";
 import WheelScreen from "./pages/WheelScreen.jsx";
 import AdminLotsScreen from "./pages/AdminLotsScreen.jsx";
 import AdminSpinsScreen from "./pages/AdminSpinsScreen.jsx";
-import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 import ComplaintsScreen from "./pages/ComplaintsScreen.jsx";
 import AdminComplaintsScreen from "./pages/AdminComplaintsScreen.jsx";
 import HistoryScreen from "./pages/HistoryScreen.jsx";
 import AdminClientsScreen from "./pages/AdminClientsScreen.jsx";
+import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
+
 const translations = {
   fr: {
     dir: "ltr",
@@ -89,7 +90,6 @@ const LANG_ORDER = ["fr", "ar", "zgh"];
 const LANG_LABEL = { fr: "FR", ar: "ع", zgh: "ⵣ" };
 const FONT_BY_LANG = { fr: "var(--font-body)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 const DISPLAY_FONT_BY_LANG = { fr: "var(--font-display)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
-
 
 function BrandMark({ size = 120, opacity = 1, ringOnly = false }) {
   const id = React.useId ? React.useId() : "bm";
@@ -327,6 +327,8 @@ export default function App() {
       content = <WheelScreen setScreen={setScreen} />;
     } else if (screen === "complaints") {
       content = <ComplaintsScreen setScreen={setScreen} />;
+    } else if (screen === "history") {
+      content = <HistoryScreen setScreen={setScreen} />;
     } else {
       content = <Dashboard setScreen={setScreen} />;
     }
