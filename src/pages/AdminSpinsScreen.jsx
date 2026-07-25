@@ -33,21 +33,14 @@ export default function AdminSpinsScreen({ setScreen }) {
     return clients.find((c) => c.userId === spin.clientId);
   }
 
+  // Les points sont déjà déduits au moment du tirage —
+  // ici on ne fait que tracer la remise physique du lot.
   async function toggleDelivered(spin) {
-    const client = clientOf(spin);
     const willDeliver = !spin.delivered;
-
-    const { newBalance } = await markSpinDelivered(spin.$id, willDeliver, willDeliver ? client : null);
-
+    await markSpinDelivered(spin.$id, willDeliver);
     setSpins((prev) =>
       prev.map((s) => (s.$id === spin.$id ? { ...s, delivered: willDeliver } : s))
     );
-
-    if (willDeliver && client && newBalance !== null) {
-      setClients((prev) =>
-        prev.map((c) => (c.$id === client.$id ? { ...c, loyaltyPoints: newBalance } : c))
-      );
-    }
   }
 
   const visibleSpins = spins.filter((s) => {
