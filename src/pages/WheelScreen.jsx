@@ -11,11 +11,13 @@ import {
   photoUrl,
 } from "../lib/tombola.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
+import { useUI } from "../lib/i18n.js";
 
 const SLICE_COLORS = [GOLD, BRONZE];
 
 export default function WheelScreen({ setScreen }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const ui = useUI(lang);
   const { user, profile } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -35,9 +37,8 @@ export default function WheelScreen({ setScreen }) {
     if (range) {
       const list = await listActivePrizesForRange(range.min);
       setPrizes(list);
-    } else {
-      setNextLocked(findNextLockedRange(points, spins));
     }
+    setNextLocked(findNextLockedRange(points, spins));
     setLoading(false);
   }
 
@@ -67,46 +68,44 @@ export default function WheelScreen({ setScreen }) {
     }, 4200);
   }
 
-  const inputPanel = { backgroundColor: PANEL, border: `1px solid ${GOLD}33` };
+  const panel = { backgroundColor: PANEL, border: `1px solid ${GOLD}33` };
+  const noDrawPossible = !availableRange || prizes.length === 0;
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center px-6 py-10" dir={t.dir} style={{ backgroundColor: INK, color: CREAM }}>
       <div className="w-full max-w-md">
         <button onClick={() => setScreen("dashboard")} className="flex items-center gap-2 text-sm mb-6" style={{ color: MUTED }}>
-          <ArrowLeft size={16} /> Retour au tableau de bord
+          <ArrowLeft size={16} /> {ui.backToDashboard}
         </button>
 
-        <h1 className="text-xl font-semibold mb-1 text-center">Tombola TOP MARK</h1>
+        <h1 className="text-xl font-semibold mb-1 text-center">{ui.tombolaTitle}</h1>
         <p className="text-sm mb-6 text-center" style={{ color: MUTED }}>
-          Solde actuel : <strong style={{ color: GOLD }}>{profile?.loyaltyPoints || 0} kg cumulés</strong>
+          {ui.currentBalance} : <strong style={{ color: GOLD }}>{profile?.loyaltyPoints || 0} {ui.kgCumulated}</strong>
         </p>
 
-        {loading && <p className="text-sm text-center" style={{ color: MUTED }}>Chargement…</p>}
+        {loading && <p className="text-sm text-center" style={{ color: MUTED }}>{ui.loading}</p>}
 
-        {!loading && (!availableRange || prizes.length === 0) && !result && (
-          <div className="rounded-2xl p-6 text-center" style={inputPanel}>
+        {!loading && noDrawPossible && !result && (
+          <div className="rounded-2xl p-6 text-center" style={panel}>
             <p className="mb-2">
               {availableRange && prizes.length === 0
-                ? `Palier ${availableRange.min}-${availableRange.max} kg débloqué, mais aucun lot n'est encore configuré pour cette tranche. Contactez TOP MARK.`
-                : "Aucun tirage disponible pour le moment."}
+                ? `${availableRange.min}-${availableRange.max} ${ui.noPrizesConfigured}`
+                : ui.noDrawAvailable}
             </p>
             {!availableRange && nextLocked ? (
               <p className="text-sm" style={{ color: MUTED }}>
-                Encore <strong style={{ color: GOLD }}>{nextLocked.min - (profile?.loyaltyPoints || 0)} kg</strong> à
-                acheter pour débloquer le prochain tirage ({nextLocked.min}–{nextLocked.max} kg).
+                {ui.stillNeed} <strong style={{ color: GOLD }}>{nextLocked.min - (profile?.loyaltyPoints || 0)} kg</strong> {ui.toUnlock} ({nextLocked.min}–{nextLocked.max} kg).
               </p>
-            ) : (
-              <p className="text-sm" style={{ color: MUTED }}>
-                Vous avez atteint tous les paliers disponibles pour l'instant !
-              </p>
-            )}
+            ) : !availableRange ? (
+              <p className="text-sm" style={{ color: MUTED }}>{ui.allTiersReached}</p>
+            ) : null}
           </div>
         )}
 
         {!loading && availableRange && prizes.length > 0 && !result && (
           <div className="flex flex-col items-center gap-6">
             <p className="text-sm text-center rounded-full px-4 py-2" style={{ backgroundColor: `${GOLD}22`, color: GOLD, border: `1px solid ${GOLD}55` }}>
-              Tirage débloqué — palier {availableRange.min}-{availableRange.max} kg 🎉
+              {ui.drawUnlocked} {availableRange.min}-{availableRange.max} kg 🎉
             </p>
 
             <div className="relative" style={{ width: 260, height: 260 }}>
@@ -149,7 +148,7 @@ export default function WheelScreen({ setScreen }) {
               style={{ backgroundColor: GOLD, color: INK }}
             >
               <Sparkles size={16} />
-              {spinning ? "Tirage en cours…" : "Tourner la roue"}
+              {spinning ? ui.spinning : ui.spinWheel}
             </button>
 
             <div className="w-full flex flex-col gap-1">
@@ -164,22 +163,20 @@ export default function WheelScreen({ setScreen }) {
         )}
 
         {result && (
-          <div className="rounded-2xl p-6 text-center flex flex-col items-center gap-3" style={inputPanel}>
+          <div className="rounded-2xl p-6 text-center flex flex-col items-center gap-3" style={panel}>
             <Sparkles size={32} color={GOLD} />
-            <p className="text-lg font-semibold">Félicitations !</p>
+            <p className="text-lg font-semibold">{ui.congrats}</p>
             {result.photoFileId && (
               <img src={photoUrl(result.photoFileId)} alt={result.label} className="w-32 h-32 rounded-xl object-cover" />
             )}
             <p style={{ color: GOLD }}>{result.label}</p>
-            <p className="text-xs" style={{ color: MUTED }}>
-              Contactez votre représentant TOP MARK pour récupérer votre lot.
-            </p>
+            <p className="text-xs" style={{ color: MUTED }}>{ui.contactRep}</p>
             <button
               onClick={() => setScreen("dashboard")}
               className="rounded-full px-6 py-2.5 text-sm font-semibold mt-2"
               style={{ backgroundColor: GOLD, color: INK }}
             >
-              Retour au tableau de bord
+              {ui.backToDashboard}
             </button>
           </div>
         )}
