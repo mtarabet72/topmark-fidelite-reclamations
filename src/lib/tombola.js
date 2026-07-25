@@ -18,6 +18,8 @@ export const RANGES = [
   { min: 750, max: 1000 },
 ];
 
+export const MAX_ATTEMPTS = 2;
+
 export function findRangeForPoints(points) {
   return RANGES.find((r) => points >= r.min && points <= r.max) || null;
 }
@@ -70,36 +72,55 @@ export function drawPrize(prizes) {
   return prizes[prizes.length - 1];
 }
 
-/**
- * Enregistre le tirage ET déduit les points immédiatement.
- * Appelé AVANT l'animation : le résultat est verrouillé, impossible de rejouer.
- */
-export async function recordSpin({ client, prize, thresholdPoints }) {
-  // 1. Verrouiller le tirage
-  await databases.createDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, ID.unique(), {
+// Un tirage lancé mais pas encore confirmé (bloque tout nouveau tirage)
+export function findPendingSpin(spins) {
+  return spins.find((s) => s.confirmed !== true) || null;
+}
+
+// 1er essai : crée le tirage en attente (le palier est verrouillé immédiatement)
+export async function startSpin({ client, prize, thresholdPoints }) {
+  return databases.createDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, ID.unique(), {
     clientId: client.userId,
     prizeId: prize.$id,
     thresholdPoints,
     spunAt: new Date().toISOString(),
     delivered: false,
+    confirmed: false,
+    attemptNumber: 1,
+  });
+}
+
+// 2e essai : remplace le lot du tirage en attente
+export async function retrySpin({ spin, prize }) {
+  return databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spin.$id, {
+    prizeId: prize.$id,
+    spunAt: new Date().toISOString(),
+    attemptNumber: (spin.attemptNumber || 1) + 1,
+  });
+}
+
+// Confirmation définitive : le solde du client est remis à zéro
+export async function confirmSpin({ client, spin }) {
+  await databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spin.$id, {
+    confirmed: true,
   });
 
-  // 2. Déduire les points du palier
-  const newBalance = Math.max((client.loyaltyPoints || 0) - thresholdPoints, 0);
+  const consumed = client.loyaltyPoints || 0;
 
   await databases.updateDocument(DATABASE_ID, COLLECTIONS.CLIENTS, client.$id, {
-    loyaltyPoints: newBalance,
+    loyaltyPoints: 0,
   });
 
-  // 3. Tracer le mouvement dans l'historique
-  await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
-    clientId: client.userId,
-    type: "roue",
-    points: -thresholdPoints,
-    reason: `Tirage tombola (palier ${thresholdPoints} kg)`,
-  });
+  if (consumed > 0) {
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
+      clientId: client.userId,
+      type: "roue",
+      points: -consumed,
+      reason: `Tirage tombola confirmé (palier ${spin.thresholdPoints} kg)`,
+    });
+  }
 
-  return newBalance;
+  return 0;
 }
 
 // ---------- Côté admin ----------
@@ -112,7 +133,6 @@ export async function listAllSpins() {
   return res.documents;
 }
 
-// Marque simplement la remise physique — les points ont déjà été déduits au tirage
 export async function markSpinDelivered(spinId, delivered) {
   return databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spinId, { delivered });
 }
