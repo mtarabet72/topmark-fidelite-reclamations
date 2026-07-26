@@ -12,15 +12,16 @@ import ComplaintsScreen from "./pages/ComplaintsScreen.jsx";
 import AdminComplaintsScreen from "./pages/AdminComplaintsScreen.jsx";
 import HistoryScreen from "./pages/HistoryScreen.jsx";
 import AdminClientsScreen from "./pages/AdminClientsScreen.jsx";
-import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
-import InstallPrompt from "./components/InstallPrompt.jsx";
 import NotificationsScreen from "./pages/NotificationsScreen.jsx";
 import HistorySection from "./components/HistorySection.jsx";
+import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
+import LangToggle from "./components/LangToggle.jsx";
+
 const translations = {
   fr: {
     dir: "ltr",
     appName: "TOP MARK",
-    tagline: "Distribution sarl",
+    tagline: "Distribution s.a.r.l",
     nav: { home: "Accueil", loyalty: "Fidélité", claims: "Réclamations", profile: "Profil" },
     hero: {
       eyebrow: "Espace client",
@@ -37,7 +38,7 @@ const translations = {
       claimsDesc: "Signalez un problème, suivez le ticket en direct.",
       comingSoon: "Phase suivante",
     },
-    footer: "TOP MARK Distribution sarl — Maroc",
+    footer: "TOP MARK Distribution s.a.r.l — Maroc",
     langSwitch: "العربية",
   },
   ar: {
@@ -60,7 +61,7 @@ const translations = {
       claimsDesc: "أبلغوا عن مشكلة وتابعوا التذكرة مباشرة.",
       comingSoon: "المرحلة القادمة",
     },
-    footer: "TOP MARK Distribution sarl — المغرب",
+    footer: "TOP MARK Distribution s.a.r.l — المغرب",
     langSwitch: "Français",
   },
   zgh: {
@@ -83,13 +84,11 @@ const translations = {
       claimsDesc: "ⵎⵍ ⴰⵎⵛⵛⵓⵎ, ⵟⵟⴼ ⵜⵉⵜⴰⵔⴳⵉⵜ ⴷⵖⵉ.",
       comingSoon: "ⴰⵙⴱⴰⴷⴷⵓ ⵉⵜⵜⴰⵍⵉⵏ",
     },
-    footer: "TOP MARK Distribution sarl — ⵍⵎⵖⵔⵉⴱ",
+    footer: "TOP MARK Distribution s.a.r.l — ⵍⵎⵖⵔⵉⴱ",
     langSwitch: "ⵜⴰⵎⴰⵣⵉⵖⵜ",
   },
 };
 
-const LANG_ORDER = ["fr", "ar", "zgh"];
-const LANG_LABEL = { fr: "FR", ar: "ع", zgh: "ⵣ" };
 const FONT_BY_LANG = { fr: "var(--font-body)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 const DISPLAY_FONT_BY_LANG = { fr: "var(--font-display)", ar: "var(--font-ar)", zgh: "var(--font-zgh)" };
 
@@ -114,56 +113,6 @@ function BrandMark({ size = 120, opacity = 1, ringOnly = false }) {
         </>
       )}
     </svg>
-  );
-}
-
-function LangToggle() {
-  const { lang, setLang } = useLang();
-  return (
-    <div className="flex items-center gap-1.5 rounded-full p-1" style={{ border: `1px solid ${GOLD}59` }}>
-      {LANG_ORDER.map((code) => {
-        const isActive = lang === code;
-        return (
-          <button
-            key={code}
-            onClick={() => setLang(code)}
-            className="rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2"
-            style={{ color: isActive ? INK : CREAM, backgroundColor: isActive ? GOLD : "transparent" }}
-            aria-pressed={isActive}
-          >
-            {LANG_LABEL[code]}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function NavShell({ active, setActive }) {
-  const { t } = useLang();
-  const items = [
-    { key: "home", label: t.nav.home, icon: Globe2 },
-    { key: "loyalty", label: t.nav.loyalty, icon: Gift },
-    { key: "claims", label: t.nav.claims, icon: MessageSquareWarning },
-    { key: "profile", label: t.nav.profile, icon: UserCircle2 },
-  ];
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 flex justify-around py-2 md:static md:justify-start md:gap-1 md:py-0" style={{ backgroundColor: PANEL, borderTop: `1px solid ${GOLD}33` }}>
-      {items.map(({ key, label, icon: Icon }) => {
-        const isActive = active === key;
-        return (
-          <button
-            key={key}
-            onClick={() => setActive(key)}
-            className="flex flex-col md:flex-row items-center gap-1 md:gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-none md:rounded-full text-xs md:text-sm transition-colors focus:outline-none focus-visible:ring-2"
-            style={{ color: isActive ? GOLD : MUTED, backgroundColor: isActive ? `${GOLD}1F` : "transparent", fontWeight: isActive ? 600 : 400 }}
-          >
-            <Icon size={18} strokeWidth={isActive ? 2.4 : 1.8} />
-            <span>{label}</span>
-          </button>
-        );
-      })}
-    </nav>
   );
 }
 
