@@ -13,6 +13,7 @@ export default function NotificationsScreen({ setScreen }) {
 
   const [notifs, setNotifs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   async function refresh() {
     setLoading(true);
@@ -72,7 +73,13 @@ export default function NotificationsScreen({ setScreen }) {
 
         {loading && <p className="text-sm" style={{ color: MUTED }}>{ui.loading}</p>}
 
-        {!loading && notifs.length === 0 && (
+        {error && (
+          <p className="text-xs mb-3 rounded-lg p-3" style={{ color: "#E07A5F", backgroundColor: "#E07A5F1A", border: "1px solid #E07A5F44" }}>
+            {error}
+          </p>
+        )}
+
+        {!loading && !error && notifs.length === 0 && (
           <div className="rounded-2xl p-6 text-center" style={{ backgroundColor: PANEL, border: `1px solid ${CREAM}1A` }}>
             <Bell size={28} color={MUTED} className="mx-auto mb-2" />
             <p className="text-sm" style={{ color: MUTED }}>{ui.noNotifications}</p>
