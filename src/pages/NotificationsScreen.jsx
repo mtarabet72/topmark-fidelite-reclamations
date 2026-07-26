@@ -19,8 +19,9 @@ export default function NotificationsScreen({ setScreen }) {
     try {
       const list = await listMyNotifications(user.$id);
       setNotifs(list);
+      setError("");
     } catch (err) {
-      console.error("Erreur chargement notifications :", err);
+      setError(err.message || "Erreur inconnue");
       setNotifs([]);
     } finally {
       setLoading(false);
