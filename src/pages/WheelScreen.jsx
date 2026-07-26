@@ -7,7 +7,6 @@ import {
   findAvailableRange,
   findNextLockedRange,
   findPendingSpin,
-  drawPrize,
   startSpin,
   retrySpin,
   confirmSpin,
@@ -99,32 +98,22 @@ export default function WheelScreen({ setScreen }) {
     setSpinning(true);
     setCurrentPrize(null);
 
-    const winner = drawPrize(prizes);
-
     try {
-      if (!pending) {
-        const created = await startSpin({
-          client: profile,
-          prize: winner,
-          thresholdPoints: availableRange.min,
-        });
-        setPending(created);
-      } else {
-        const updated = await retrySpin({ spin: pending, prize: winner });
-        setPending(updated);
-      }
+      const result = !pending
+        ? await startSpin({ clientUserId: user.$id, thresholdPoints: availableRange.min })
+        : await retrySpin({ clientUserId: user.$id, spinId: pending.$id });
+
+      setPending(result.spin);
+      animateTo(result.prize);
+
+      setTimeout(() => {
+        setCurrentPrize(result.prize);
+        setSpinning(false);
+      }, 4200);
     } catch (err) {
       setSpinning(false);
       setError(err.message || ui.errorOccurred);
-      return;
     }
-
-    animateTo(winner);
-
-    setTimeout(() => {
-      setCurrentPrize(winner);
-      setSpinning(false);
-    }, 4200);
   }
 
   async function handleConfirm() {
@@ -132,8 +121,8 @@ export default function WheelScreen({ setScreen }) {
     setConfirming(true);
     setError("");
     try {
-      await confirmSpin({ client: profile, spin: pending });
-      setBalance(0);
+      const newBalance = await confirmSpin({ clientUserId: user.$id, spinId: pending.$id });
+      setBalance(newBalance);
       setDone(true);
       if (refreshSession) refreshSession();
     } catch (err) {

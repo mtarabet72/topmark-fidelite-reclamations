@@ -1,5 +1,5 @@
 import { ID, Query } from "appwrite";
-import { databases, storage, DATABASE_ID, COLLECTIONS, BUCKETS } from "./appwrite";
+import { databases, storage, functions, DATABASE_ID, COLLECTIONS, BUCKETS, FUNCTIONS } from "./appwrite";
 
 // Les 13 paliers définis par TOP MARK — [min, max] en kg cumulés
 export const RANGES = [
@@ -60,67 +60,48 @@ export function findAvailableRange(loyaltyPoints, _spins) {
   return unlocked[unlocked.length - 1];
 }
 
-export function drawPrize(prizes) {
-  if (prizes.length === 0) return null;
-  const weights = prizes.map((p) => Math.max(Number(p.probability) || 0, 0.0001));
-  const total = weights.reduce((a, b) => a + b, 0);
-  let r = Math.random() * total;
-  for (let i = 0; i < prizes.length; i++) {
-    r -= weights[i];
-    if (r <= 0) return prizes[i];
-  }
-  return prizes[prizes.length - 1];
-}
-
 // Un tirage lancé mais pas encore confirmé (bloque tout nouveau tirage)
 export function findPendingSpin(spins) {
   return spins.find((s) => s.confirmed !== true) || null;
 }
 
-// 1er essai : crée le tirage en attente (le palier est verrouillé immédiatement)
-export async function startSpin({ client, prize, thresholdPoints }) {
-  return databases.createDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, ID.unique(), {
-    clientId: client.userId,
-    prizeId: prize.$id,
-    thresholdPoints,
-    spunAt: new Date().toISOString(),
-    delivered: false,
-    confirmed: false,
-    attemptNumber: 1,
-  });
-}
-
-// 2e essai : remplace le lot du tirage en attente
-export async function retrySpin({ spin, prize }) {
-  return databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spin.$id, {
-    prizeId: prize.$id,
-    spunAt: new Date().toISOString(),
-    attemptNumber: (spin.attemptNumber || 1) + 1,
-  });
-}
-
-// Confirmation définitive : le solde du client est remis à zéro
-export async function confirmSpin({ client, spin }) {
-  await databases.updateDocument(DATABASE_ID, COLLECTIONS.WHEEL_SPINS, spin.$id, {
-    confirmed: true,
-  });
-
-  const consumed = client.loyaltyPoints || 0;
-
-  await databases.updateDocument(DATABASE_ID, COLLECTIONS.CLIENTS, client.$id, {
-    loyaltyPoints: 0,
-  });
-
-  if (consumed > 0) {
-    await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
-      clientId: client.userId,
-      type: "roue",
-      points: -consumed,
-      reason: `Tirage tombola confirmé (palier ${spin.thresholdPoints} kg)`,
-    });
+async function callSpinWheel(payload) {
+  const execution = await functions.createExecution(
+    FUNCTIONS.SPIN_WHEEL,
+    JSON.stringify(payload),
+    false
+  );
+  let result;
+  try {
+    result = JSON.parse(execution.responseBody || "{}");
+  } catch {
+    result = {};
   }
+  if (execution.responseStatusCode >= 400 || !result.ok) {
+    throw new Error(result.error || "La roue a refusé cette action.");
+  }
+  return result;
+}
 
-  return 0;
+// Le tirage (choix du lot, vérification d'éligibilité, remise à zéro du solde)
+// est entièrement décidé par la Function serveur `spin-wheel` — le client ne
+// fait que déclencher l'action et afficher le lot renvoyé, ce qui empêche un
+// client de forcer le lot gagnant depuis la console du navigateur.
+
+// 1er essai : demande à la Function de créer le tirage en attente
+export async function startSpin({ clientUserId, thresholdPoints }) {
+  return callSpinWheel({ action: "start", clientUserId, thresholdPoints });
+}
+
+// 2e essai : demande à la Function de retirer un lot pour le tirage en attente
+export async function retrySpin({ clientUserId, spinId }) {
+  return callSpinWheel({ action: "retry", clientUserId, spinId });
+}
+
+// Confirmation définitive : la Function remet le solde du client à zéro
+export async function confirmSpin({ clientUserId, spinId }) {
+  const result = await callSpinWheel({ action: "confirm", clientUserId, spinId });
+  return result.newBalance;
 }
 
 // ---------- Côté admin ----------

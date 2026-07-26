@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { ID, Permission, Role } from "appwrite";
+import { ID, Permission, Query, Role } from "appwrite";
 import { account, databases, teams, DATABASE_ID, COLLECTIONS } from "./appwrite";
 
 const AuthContext = createContext();
@@ -13,9 +13,13 @@ export function AuthProvider({ children }) {
 
   async function loadProfile(userId) {
     try {
-      const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENTS, []);
-      const doc = res.documents.find((d) => d.userId === userId);
-      setProfile(doc || null);
+      const [clientRes, loyaltyRes] = await Promise.all([
+        databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENTS, [Query.equal("userId", userId)]),
+        databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENT_LOYALTY, [Query.equal("clientId", userId)]),
+      ]);
+      const doc = clientRes.documents[0];
+      const loyaltyDoc = loyaltyRes.documents[0];
+      setProfile(doc ? { ...doc, loyaltyPoints: loyaltyDoc?.loyaltyPoints ?? 0, tier: loyaltyDoc?.tier ?? "bronze" } : null);
     } catch (err) {
       console.error("Erreur chargement profil client :", err);
     }
@@ -65,8 +69,6 @@ export function AuthProvider({ children }) {
         phone: "",
         email,
         locale,
-        loyaltyPoints: 0,
-        tier: "bronze",
       },
       [
         Permission.read(Role.user(current.$id)),
@@ -74,8 +76,23 @@ export function AuthProvider({ children }) {
       ]
     );
 
+    // Le solde de points/palier vit dans une collection séparée où le client
+    // n'a que la lecture : seules les Appwrite Functions award-points et
+    // spin-wheel (clé API serveur) peuvent l'écrire, ce qui empêche un client
+    // de se créditer des points via un appel direct au SDK.
+    await databases.createDocument(
+      DATABASE_ID,
+      COLLECTIONS.CLIENT_LOYALTY,
+      ID.unique(),
+      { clientId: current.$id, loyaltyPoints: 0, tier: "bronze" },
+      [
+        Permission.read(Role.user(current.$id)),
+        Permission.read(Role.team("support-agents")),
+      ]
+    );
+
     setUser(current);
-    setProfile(doc);
+    setProfile({ ...doc, loyaltyPoints: 0, tier: "bronze" });
     await checkAdmin();
   }
 

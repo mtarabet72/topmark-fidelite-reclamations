@@ -1,16 +1,26 @@
-import { ID, Query } from "appwrite";
-import { databases, DATABASE_ID, COLLECTIONS } from "./appwrite";
+import { Query } from "appwrite";
+import { databases, functions, DATABASE_ID, COLLECTIONS, FUNCTIONS } from "./appwrite";
 import { RANGES } from "./tombola.js";
 import { createNotification } from "./notifications.js";
 
 export async function listClients(search = "") {
-  const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENTS, [
-    Query.limit(100),
-    Query.orderDesc("$createdAt"),
+  const [clientsRes, loyaltyRes] = await Promise.all([
+    databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENTS, [
+      Query.limit(100),
+      Query.orderDesc("$createdAt"),
+    ]),
+    databases.listDocuments(DATABASE_ID, COLLECTIONS.CLIENT_LOYALTY, [Query.limit(100)]),
   ]);
-  if (!search) return res.documents;
+  const loyaltyByClientId = new Map(loyaltyRes.documents.map((l) => [l.clientId, l]));
+  const merged = clientsRes.documents.map((c) => ({
+    ...c,
+    loyaltyPoints: loyaltyByClientId.get(c.userId)?.loyaltyPoints ?? 0,
+    tier: loyaltyByClientId.get(c.userId)?.tier ?? "bronze",
+  }));
+
+  if (!search) return merged;
   const term = search.toLowerCase();
-  return res.documents.filter(
+  return merged.filter(
     (c) =>
       (c.companyName || "").toLowerCase().includes(term) ||
       (c.fullName || "").toLowerCase().includes(term)
@@ -22,24 +32,31 @@ function highestUnlockedRange(points) {
   return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
 }
 
-// Règle : 1 kg acheté = 1 point
+// Règle : 1 kg acheté = 1 point.
+// Le crédit réel est effectué par la Function serveur `award-points` (exécutable
+// uniquement par l'équipe support-agents) — le client ne fait que déclencher
+// l'exécution et afficher le résultat renvoyé.
 export async function recordPurchase({ client, kg }) {
   const points = Math.round(Number(kg));
   if (!points || points <= 0) throw new Error("Quantité invalide.");
 
-  await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
-    clientId: client.userId,
-    type: "gain",
-    points,
-    reason: `Achat ${kg} kg`,
-  });
+  const execution = await functions.createExecution(
+    FUNCTIONS.AWARD_POINTS,
+    JSON.stringify({ clientUserId: client.userId, kg: points }),
+    false
+  );
 
-  const oldBalance = client.loyaltyPoints || 0;
-  const newBalance = oldBalance + points;
+  let result;
+  try {
+    result = JSON.parse(execution.responseBody || "{}");
+  } catch {
+    result = {};
+  }
+  if (execution.responseStatusCode >= 400 || !result.ok) {
+    throw new Error(result.error || "Le crédit de points a été refusé par le serveur.");
+  }
 
-  await databases.updateDocument(DATABASE_ID, COLLECTIONS.CLIENTS, client.$id, {
-    loyaltyPoints: newBalance,
-  });
+  const { oldBalance, newBalance } = result;
 
   // Notifie le client si l'achat lui fait franchir un nouveau palier tombola
   const rangeBefore = highestUnlockedRange(oldBalance);
