@@ -23,6 +23,7 @@ export default function AdminComplaintsScreen({ setScreen }) {
   const [filter, setFilter] = useState("all");
   const [drafts, setDrafts] = useState({});
   const [savingId, setSavingId] = useState(null);
+  const [notifError, setNotifError] = useState("");
 
   async function refresh() {
     setLoading(true);
@@ -55,8 +56,9 @@ export default function AdminComplaintsScreen({ setScreen }) {
         relatedType: "complaint",
         relatedId: complaint.$id,
       });
+      setNotifError("");
     } catch (err) {
-      console.error("Notification statut non envoyée :", err);
+      setNotifError(`Notification statut : ${err.message || "erreur inconnue"}`);
     }
   }
 
@@ -81,8 +83,9 @@ export default function AdminComplaintsScreen({ setScreen }) {
         relatedType: "complaint",
         relatedId: complaint.$id,
       });
+      setNotifError("");
     } catch (err) {
-      console.error("Notification réponse non envoyée :", err);
+      setNotifError(`Notification réponse : ${err.message || "erreur inconnue"}`);
     }
 
     setSavingId(null);
@@ -104,6 +107,12 @@ export default function AdminComplaintsScreen({ setScreen }) {
         <p className="text-sm mb-5" style={{ color: MUTED }}>
           {newCount} nouvelle{newCount > 1 ? "s" : ""} réclamation{newCount > 1 ? "s" : ""}
         </p>
+
+        {notifError && (
+          <p className="text-xs mb-4 rounded-lg p-3" style={{ color: "#E07A5F", backgroundColor: "#E07A5F1A", border: "1px solid #E07A5F44" }}>
+            {notifError}
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2 mb-5">
           <button
