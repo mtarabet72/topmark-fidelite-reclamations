@@ -14,6 +14,7 @@ export const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 
 export const COLLECTIONS = {
   CLIENTS: "clients",
+  CLIENT_LOYALTY: "client_loyalty",
   LOYALTY_TRANSACTIONS: "loyalty_transactions",
   WHEEL_PRIZES: "wheel_prizes",
   WHEEL_SPINS: "wheel_spins",
@@ -21,6 +22,13 @@ export const COLLECTIONS = {
   COMPLAINT_CATEGORIES: "complaint_categories",
   NOTIFICATIONS: "notifications",
   CLIENT_EQUIPMENT: "client_equipment",
+};
+
+// Appwrite Functions serveur — seules autorisées à modifier le solde de points
+// et à trancher les tirages de la roue (voir functions/*/README.md).
+export const FUNCTIONS = {
+  AWARD_POINTS: "award-points",
+  SPIN_WHEEL: "spin-wheel",
 };
 
 export const BUCKETS = {
