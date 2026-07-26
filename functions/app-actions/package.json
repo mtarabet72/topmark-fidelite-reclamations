@@ -1,0 +1,9 @@
+{
+  "name": "app-actions",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "dependencies": {
+    "node-appwrite": "^14.0.0"
+  }
+}
