@@ -13,6 +13,8 @@ import AdminComplaintsScreen from "./pages/AdminComplaintsScreen.jsx";
 import HistoryScreen from "./pages/HistoryScreen.jsx";
 import AdminClientsScreen from "./pages/AdminClientsScreen.jsx";
 import NotificationsScreen from "./pages/NotificationsScreen.jsx";
+import LoyaltyInfoScreen from "./pages/LoyaltyInfoScreen.jsx";
+import ComplaintsInfoScreen from "./pages/ComplaintsInfoScreen.jsx";
 import HistorySection from "./components/HistorySection.jsx";
 import { GOLD, BRONZE, INK, PANEL, CREAM, MUTED, LangContext, useLang } from "./lib/theme.js";
 import LangToggle from "./components/LangToggle.jsx";
@@ -135,11 +137,11 @@ function StatusBadges() {
   );
 }
 
-function PlaceholderCard({ title, desc, icon: Icon, accent }) {
+function PlaceholderCard({ title, desc, icon: Icon, accent, onClick }) {
   const { t, lang } = useLang();
   const Chevron = lang === "ar" ? ChevronLeft : ChevronRight;
   return (
-    <div className="rounded-2xl p-5 flex flex-col gap-3" style={{ backgroundColor: PANEL, border: `1px solid ${accent}33` }}>
+    <div onClick={onClick} className="rounded-2xl p-5 flex flex-col gap-3 cursor-pointer" style={{ backgroundColor: PANEL, border: `1px solid ${accent}33` }}>
       <div className="flex items-center justify-between">
         <div className="rounded-xl p-2.5" style={{ backgroundColor: `${accent}22` }}>
           <Icon size={20} color={accent} />
@@ -202,8 +204,8 @@ function AppShell({ setScreen }) {
       </div>
 
       <section className="px-6 pb-16 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto w-full" style={{ borderTop: `1px solid ${GOLD}1A`, paddingTop: "3.5rem" }}>
-        <PlaceholderCard title={t.sections.loyaltyTitle} desc={t.sections.loyaltyDesc} icon={Gift} accent={GOLD} />
-        <PlaceholderCard title={t.sections.claimsTitle} desc={t.sections.claimsDesc} icon={MessageSquareWarning} accent={BRONZE} />
+        <PlaceholderCard title={t.sections.loyaltyTitle} desc={t.sections.loyaltyDesc} icon={Gift} accent={GOLD} onClick={() => setScreen("loyalty-info")} />
+        <PlaceholderCard title={t.sections.claimsTitle} desc={t.sections.claimsDesc} icon={MessageSquareWarning} accent={BRONZE} onClick={() => setScreen("complaints-info")} />
       </section>
 
       <footer className="text-center text-xs py-4" style={{ color: `${MUTED}99` }}>{t.footer}</footer>
@@ -283,6 +285,10 @@ export default function App() {
     }
   } else if (screen === "login" || screen === "register") {
     content = <AuthScreen mode={screen} setScreen={setScreen} />;
+  } else if (screen === "loyalty-info") {
+    content = <LoyaltyInfoScreen setScreen={setScreen} />;
+  } else if (screen === "complaints-info") {
+    content = <ComplaintsInfoScreen setScreen={setScreen} />;
   } else {
     content = <AppShell setScreen={setScreen} />;
   }
