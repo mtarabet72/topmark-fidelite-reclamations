@@ -1,4 +1,4 @@
-import { ID, Query, Permission, Role } from "appwrite";
+import { ID, Query } from "appwrite";
 import { databases, DATABASE_ID, COLLECTIONS } from "./appwrite";
 
 export async function listMyNotifications(clientId) {
@@ -25,24 +25,14 @@ export async function markAllAsRead(notifs) {
   await Promise.all(unread.map((n) => markAsRead(n.$id)));
 }
 
-// Appelée côté admin (Team support-agents a le droit de Create)
 export async function createNotification({ clientId, titleFr, titleAr, titleZgh, relatedType, relatedId }) {
-  return databases.createDocument(
-    DATABASE_ID,
-    COLLECTIONS.NOTIFICATIONS,
-    ID.unique(),
-    {
-      clientId,
-      titleFr,
-      titleAr,
-      titleZgh,
-      read: false,
-      relatedType,
-      relatedId: relatedId || "",
-    },
-    [
-      Permission.read(Role.user(clientId)),
-      Permission.update(Role.user(clientId)),
-    ]
-  );
+  return databases.createDocument(DATABASE_ID, COLLECTIONS.NOTIFICATIONS, ID.unique(), {
+    clientId,
+    titleFr,
+    titleAr,
+    titleZgh,
+    read: false,
+    relatedType,
+    relatedId: relatedId || "",
+  });
 }
