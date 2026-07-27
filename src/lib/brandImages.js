@@ -7,9 +7,9 @@ import { storage, BUCKETS } from "./appwrite";
  * modification de code n'est nécessaire.
  */
 export const HISTORY_IMAGES = {
-  fields: "6a6752210023c86fa66b"
-  beans:  "6a67524b003342dd9f7d"
-  roasting: "6a6753ac0022cd902922"
+  fields: "6a6752210023c86fa66b",
+  beans: "6a67524b003342dd9f7d",
+  roasting: "6a6753ac0022cd902922",
 };
 
 export function brandImageUrl(fileId) {
