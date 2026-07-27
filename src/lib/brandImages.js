@@ -7,9 +7,9 @@ import { storage, BUCKETS } from "./appwrite";
  * modification de code n'est nécessaire.
  */
 export const HISTORY_IMAGES = {
-  fields: null,   // photo des champs / plantations de café
-  beans: null,    // photo de grains de café
-  roasting: null, // photo de la torréfaction
+  fields: "6a6752210023c86fa66b"
+  beans:  "6a67524b003342dd9f7d"
+  roasting: "6a6753ac0022cd902922"
 };
 
 export function brandImageUrl(fileId) {
