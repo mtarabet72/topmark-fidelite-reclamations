@@ -2,8 +2,8 @@ import { functions } from "./appwrite";
 
 const FUNCTION_ID = "app-actions";
 
-async function callAction(action) {
-  const exec = await functions.createExecution(FUNCTION_ID, JSON.stringify({ action }), false);
+async function callAction(action, params = {}) {
+  const exec = await functions.createExecution(FUNCTION_ID, JSON.stringify({ action, ...params }), false);
   let body = {};
   try {
     body = JSON.parse(exec.responseBody || "{}");
@@ -29,4 +29,22 @@ export async function secureRetrySpin() {
 export async function secureConfirmSpin() {
   const { newBalance } = await callAction("confirm");
   return newBalance;
+}
+
+export async function secureNotify({ clientId, titleFr, titleAr, titleZgh, relatedType, relatedId }) {
+  return callAction("notify", { clientId, titleFr, titleAr, titleZgh, relatedType, relatedId });
+}
+
+export async function secureListNotifications() {
+  const { notifications } = await callAction("list-notifications");
+  return notifications;
+}
+
+export async function secureMarkRead(notificationId) {
+  const { notification } = await callAction("mark-read", { notificationId });
+  return notification;
+}
+
+export async function secureMarkAllRead() {
+  return callAction("mark-all-read");
 }
