@@ -9,7 +9,7 @@ import {
   STATUS_LABELS,
 } from "../lib/complaints.js";
 import { listClients } from "../lib/purchases.js";
-import { createNotification } from "../lib/notifications.js";
+import { secureNotify } from "../lib/secureActions.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 
 const STATUS_ORDER = ["nouveau", "en_cours", "resolu", "rejete"];
@@ -48,7 +48,7 @@ export default function AdminComplaintsScreen({ setScreen }) {
 
     const st = STATUS_LABELS[newStatus];
     try {
-      await createNotification({
+      await secureNotify({
         clientId: complaint.clientId,
         titleFr: `Votre réclamation est maintenant : ${st.fr}`,
         titleAr: `أصبحت شكايتكم الآن: ${st.ar}`,
@@ -75,7 +75,7 @@ export default function AdminComplaintsScreen({ setScreen }) {
     });
 
     try {
-      await createNotification({
+      await secureNotify({
         clientId: complaint.clientId,
         titleFr: "TOP MARK a répondu à votre réclamation.",
         titleAr: "ردت توب مارك على شكايتكم.",
