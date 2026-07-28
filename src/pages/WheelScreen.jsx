@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Sparkles, RotateCcw, Check, Gift } from "lucide-react";
+import { ArrowLeft, Sparkles, RotateCcw, Check } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import {
   listActivePrizesForRange,
@@ -7,32 +7,15 @@ import {
   findAvailableRange,
   findNextLockedRange,
   findPendingSpin,
-  drawPrize,
-  startSpin,
-  retrySpin,
-  confirmSpin,
   photoUrl,
   MAX_ATTEMPTS,
 } from "../lib/tombola.js";
+import { secureStartSpin, secureRetrySpin, secureConfirmSpin } from "../lib/secureActions.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
 import LangToggle from "../components/LangToggle.jsx";
 
 const SLICE_COLORS = [GOLD, BRONZE];
-const WHEEL_SIZE = 260;
-const IMG_SIZE = 56;
-const IMG_RADIUS = 85; // distance du centre à laquelle les images sont placées
-
-function sliceImagePosition(index, total) {
-  const anglePerSlice = 360 / total;
-  const midAngleDeg = anglePerSlice * index + anglePerSlice / 2;
-  const rad = (midAngleDeg * Math.PI) / 180;
-  const cx = WHEEL_SIZE / 2;
-  const cy = WHEEL_SIZE / 2;
-  const x = cx + IMG_RADIUS * Math.sin(rad) - IMG_SIZE / 2;
-  const y = cy - IMG_RADIUS * Math.cos(rad) - IMG_SIZE / 2;
-  return { left: x, top: y };
-}
 
 export default function WheelScreen({ setScreen }) {
   const { t, lang } = useLang();
@@ -94,28 +77,25 @@ export default function WheelScreen({ setScreen }) {
   }
 
   async function handleSpin() {
-    if (spinning || prizes.length === 0 || !profile) return;
+    if (spinning || prizes.length === 0) return;
     setError("");
     setSpinning(true);
     setCurrentPrize(null);
 
-    const winner = drawPrize(prizes);
-
+    let spin;
     try {
-      if (!pending) {
-        const created = await startSpin({
-          client: profile,
-          prize: winner,
-          thresholdPoints: availableRange.min,
-        });
-        setPending(created);
-      } else {
-        const updated = await retrySpin({ spin: pending, prize: winner });
-        setPending(updated);
-      }
+      spin = pending ? await secureRetrySpin() : await secureStartSpin();
+      setPending(spin);
     } catch (err) {
       setSpinning(false);
       setError(err.message || ui.errorOccurred);
+      return;
+    }
+
+    const winner = prizes.find((p) => p.$id === spin.prizeId);
+    if (!winner) {
+      setSpinning(false);
+      setError(ui.errorOccurred);
       return;
     }
 
@@ -128,12 +108,12 @@ export default function WheelScreen({ setScreen }) {
   }
 
   async function handleConfirm() {
-    if (!pending || !profile) return;
+    if (!pending) return;
     setConfirming(true);
     setError("");
     try {
-      await confirmSpin({ client: profile, spin: pending });
-      setBalance(0);
+      const newBalance = await secureConfirmSpin();
+      setBalance(newBalance);
       setDone(true);
       if (refreshSession) refreshSession();
     } catch (err) {
@@ -213,8 +193,7 @@ export default function WheelScreen({ setScreen }) {
               </p>
             )}
 
-            <div className="relative" style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}>
-              {/* Pointeur — fixe, ne tourne pas */}
+            <div className="relative" style={{ width: 260, height: 260 }}>
               <div
                 className="absolute z-20"
                 style={{
@@ -229,12 +208,11 @@ export default function WheelScreen({ setScreen }) {
                 }}
               />
 
-              {/* Roue — tourne avec ses images */}
               <div
                 className="rounded-full relative"
                 style={{
-                  width: WHEEL_SIZE,
-                  height: WHEEL_SIZE,
+                  width: 260,
+                  height: 260,
                   transform: `rotate(${rotation}deg)`,
                   transition: spinning ? "transform 4.2s cubic-bezier(0.17, 0.67, 0.16, 0.99)" : "none",
                   background: `conic-gradient(${prizes
@@ -248,14 +226,22 @@ export default function WheelScreen({ setScreen }) {
                 }}
               >
                 {prizes.map((p, i) => {
-                  const pos = sliceImagePosition(i, prizes.length);
+                  const anglePerSlice = 360 / prizes.length;
+                  const midAngleDeg = anglePerSlice * i + anglePerSlice / 2;
+                  const rad = (midAngleDeg * Math.PI) / 180;
+                  const IMG_SIZE = 56;
+                  const IMG_RADIUS = 85;
+                  const cx = 130;
+                  const cy = 130;
+                  const x = cx + IMG_RADIUS * Math.sin(rad) - IMG_SIZE / 2;
+                  const y = cy - IMG_RADIUS * Math.cos(rad) - IMG_SIZE / 2;
                   return (
                     <div
                       key={p.$id}
                       className="absolute rounded-full overflow-hidden flex items-center justify-center"
                       style={{
-                        left: pos.left,
-                        top: pos.top,
+                        left: x,
+                        top: y,
                         width: IMG_SIZE,
                         height: IMG_SIZE,
                         border: `2px solid ${CREAM}CC`,
@@ -264,13 +250,9 @@ export default function WheelScreen({ setScreen }) {
                       }}
                     >
                       {p.photoFileId ? (
-                        <img
-                          src={photoUrl(p.photoFileId)}
-                          alt={p.label}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={photoUrl(p.photoFileId)} alt={p.label} className="w-full h-full object-cover" />
                       ) : (
-                        <Gift size={22} color={CREAM} />
+                        <Sparkles size={22} color={CREAM} />
                       )}
                     </div>
                   );
