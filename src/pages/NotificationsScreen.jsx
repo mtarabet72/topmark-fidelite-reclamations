@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Bell, Gift, MessageSquareWarning, Check } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
-import { listMyNotifications, notificationTitle, markAsRead, markAllAsRead } from "../lib/notifications.js";
+import { notificationTitle } from "../lib/notifications.js";
+import { secureListNotifications, secureMarkRead, secureMarkAllRead } from "../lib/secureActions.js";
 import { useLang, GOLD, BRONZE, INK, PANEL, CREAM, MUTED } from "../lib/theme.js";
 import { useUI } from "../lib/i18n.js";
 import LangToggle from "../components/LangToggle.jsx";
@@ -18,7 +19,7 @@ export default function NotificationsScreen({ setScreen }) {
   async function refresh() {
     setLoading(true);
     try {
-      const list = await listMyNotifications(user.$id);
+      const list = await secureListNotifications();
       setNotifs(list);
       setError("");
     } catch (err) {
@@ -36,12 +37,12 @@ export default function NotificationsScreen({ setScreen }) {
 
   async function handleClick(notif) {
     if (notif.read) return;
-    await markAsRead(notif.$id);
+    await secureMarkRead(notif.$id);
     setNotifs((prev) => prev.map((n) => (n.$id === notif.$id ? { ...n, read: true } : n)));
   }
 
   async function handleMarkAll() {
-    await markAllAsRead(notifs);
+    await secureMarkAllRead();
     setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
   }
 
