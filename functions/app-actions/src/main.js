@@ -1,6 +1,5 @@
-import { Client, Databases, Query, ID } from "node-appwrite";
+import { Client, Databases, Users, Query, ID } from "node-appwrite";
 
-// Dupliqué depuis src/lib/tombola.js — à garder synchronisé si les paliers changent un jour
 const RANGES = [
   { min: 6, max: 11 },
   { min: 12, max: 17 },
@@ -17,12 +16,14 @@ const RANGES = [
   { min: 750, max: 1000 },
 ];
 const MAX_ATTEMPTS = 2;
+const SUPPORT_TEAM_ID = "support-agents";
 
 const COLLECTIONS = {
   CLIENTS: "clients",
   WHEEL_PRIZES: "wheel_prizes",
   WHEEL_SPINS: "wheel_spins",
   LOYALTY_TRANSACTIONS: "loyalty_transactions",
+  NOTIFICATIONS: "notifications",
 };
 
 function findAvailableRange(points) {
@@ -41,6 +42,15 @@ function drawPrize(prizes) {
   return prizes[prizes.length - 1];
 }
 
+async function isSupportAgent(users, userId) {
+  try {
+    const memberships = await users.listMemberships(userId);
+    return memberships.teams?.some((t) => t.$id === SUPPORT_TEAM_ID) || false;
+  } catch {
+    return false;
+  }
+}
+
 export default async ({ req, res, log, error }) => {
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   const userId = req.headers["x-appwrite-user-id"];
@@ -54,6 +64,7 @@ export default async ({ req, res, log, error }) => {
     .setProject(process.env.APPWRITE_PROJECT_ID)
     .setKey(process.env.APPWRITE_API_KEY);
   const databases = new Databases(client);
+  const users = new Users(client);
 
   let body = {};
   try {
@@ -64,7 +75,66 @@ export default async ({ req, res, log, error }) => {
   const action = body.action;
 
   try {
-    // Profil client
+    // ---------- Notifications ----------
+
+    if (action === "notify") {
+      const isAgent = await isSupportAgent(users, userId);
+      if (!isAgent) {
+        return res.json({ error: "Action réservée à l'équipe support." }, 403);
+      }
+      const { clientId, titleFr, titleAr, titleZgh, relatedType, relatedId } = body;
+      if (!clientId || !titleFr) {
+        return res.json({ error: "Paramètres manquants." }, 400);
+      }
+      const notif = await databases.createDocument(databaseId, COLLECTIONS.NOTIFICATIONS, ID.unique(), {
+        clientId,
+        titleFr,
+        titleAr: titleAr || titleFr,
+        titleZgh: titleZgh || titleFr,
+        read: false,
+        relatedType: relatedType || "loyalty",
+        relatedId: relatedId || "",
+      });
+      return res.json({ notification: notif });
+    }
+
+    if (action === "list-notifications") {
+      const list = await databases.listDocuments(databaseId, COLLECTIONS.NOTIFICATIONS, [
+        Query.equal("clientId", userId),
+        Query.orderDesc("$createdAt"),
+        Query.limit(100),
+      ]);
+      return res.json({ notifications: list.documents });
+    }
+
+    if (action === "mark-read") {
+      const { notificationId } = body;
+      const notif = await databases.getDocument(databaseId, COLLECTIONS.NOTIFICATIONS, notificationId);
+      if (notif.clientId !== userId) {
+        return res.json({ error: "Non autorisé." }, 403);
+      }
+      const updated = await databases.updateDocument(databaseId, COLLECTIONS.NOTIFICATIONS, notificationId, {
+        read: true,
+      });
+      return res.json({ notification: updated });
+    }
+
+    if (action === "mark-all-read") {
+      const list = await databases.listDocuments(databaseId, COLLECTIONS.NOTIFICATIONS, [
+        Query.equal("clientId", userId),
+        Query.equal("read", false),
+        Query.limit(200),
+      ]);
+      await Promise.all(
+        list.documents.map((n) =>
+          databases.updateDocument(databaseId, COLLECTIONS.NOTIFICATIONS, n.$id, { read: true })
+        )
+      );
+      return res.json({ ok: true, count: list.documents.length });
+    }
+
+    // ---------- Tombola ----------
+
     const clientDocs = await databases.listDocuments(databaseId, COLLECTIONS.CLIENTS, [
       Query.equal("userId", userId),
       Query.limit(1),
@@ -74,7 +144,6 @@ export default async ({ req, res, log, error }) => {
     }
     const clientDoc = clientDocs.documents[0];
 
-    // Tirage en attente existant ?
     const pendingDocs = await databases.listDocuments(databaseId, COLLECTIONS.WHEEL_SPINS, [
       Query.equal("clientId", userId),
       Query.equal("confirmed", false),
@@ -84,7 +153,6 @@ export default async ({ req, res, log, error }) => {
 
     if (action === "start") {
       if (pending) {
-        // Un tirage est déjà en cours — on le renvoie tel quel plutôt que d'en créer un second
         return res.json({ spin: pending });
       }
 
