@@ -1,0 +1,263 @@
+{
+  "projectId": "6a61fa65002598b581a5",
+  "projectName": "TOP MARK Fidélité",
+  "settings": {
+    "services": {
+      "account": true,
+      "databases": true,
+      "storage": true,
+      "functions": true,
+      "messaging": true
+    }
+  },
+  "databases": [
+    {
+      "$id": "topmark_main",
+      "name": "TOP MARK — Base principale"
+    }
+  ],
+  "collections": [
+    {
+      "$id": "clients",
+      "$permissions": [
+        "read(\"team:support-agents\")",
+        "update(\"team:support-agents\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "clients",
+      "documentSecurity": true,
+      "enabled": true,
+      "attributes": [
+        { "key": "userId", "type": "string", "size": 64, "required": true },
+        { "key": "fullName", "type": "string", "size": 128, "required": true },
+        { "key": "phone", "type": "string", "size": 32, "required": false },
+        { "key": "email", "type": "string", "size": 128, "required": true },
+        { "key": "locale", "type": "string", "size": 8, "required": true, "default": "fr" },
+        { "key": "loyaltyPoints", "type": "integer", "required": true, "default": 0 },
+        { "key": "tier", "type": "string", "size": 16, "required": true, "default": "bronze" },
+        { "key": "companyName", "type": "string", "size": 128, "required": false },
+        { "key": "address", "type": "string", "size": 256, "required": false },
+        { "key": "city", "type": "string", "size": 64, "required": false },
+        { "key": "technicalFileCompleted", "type": "boolean", "required": false, "default": false }
+      ],
+      "indexes": [
+        { "key": "idx_userId", "type": "unique", "attributes": ["userId"] }
+      ]
+    },
+    {
+      "$id": "loyalty_transactions",
+      "$permissions": [
+        "create(\"team:support-agents\")",
+        "read(\"team:support-agents\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "loyalty_transactions",
+      "documentSecurity": true,
+      "enabled": true,
+      "attributes": [
+        { "key": "clientId", "type": "string", "size": 64, "required": true },
+        { "key": "type", "type": "string", "size": 16, "required": true },
+        { "key": "points", "type": "integer", "required": true },
+        { "key": "reason", "type": "string", "size": 256, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_clientId", "type": "key", "attributes": ["clientId"] }
+      ]
+    },
+    {
+      "$id": "wheel_prizes",
+      "$permissions": [
+        "read(\"users\")",
+        "create(\"team:support-agents\")",
+        "update(\"team:support-agents\")",
+        "delete(\"team:support-agents\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "wheel_prizes",
+      "documentSecurity": false,
+      "enabled": true,
+      "attributes": [
+        { "key": "label", "type": "string", "size": 128, "required": true },
+        { "key": "rangeMin", "type": "integer", "required": true },
+        { "key": "probability", "type": "double", "required": true, "default": 0.33 },
+        { "key": "pointsValue", "type": "integer", "required": false, "default": 0 },
+        { "key": "active", "type": "boolean", "required": true, "default": true },
+        { "key": "photoFileId", "type": "string", "size": 64, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_rangeMin", "type": "key", "attributes": ["rangeMin"] }
+      ]
+    },
+    {
+      "$id": "wheel_spins",
+      "$permissions": [
+        "read(\"team:support-agents\")",
+        "update(\"team:support-agents\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "wheel_spins",
+      "documentSecurity": true,
+      "enabled": true,
+      "attributes": [
+        { "key": "clientId", "type": "string", "size": 64, "required": true },
+        { "key": "prizeId", "type": "string", "size": 64, "required": true },
+        { "key": "thresholdPoints", "type": "integer", "required": true },
+        { "key": "spunAt", "type": "datetime", "required": true },
+        { "key": "delivered", "type": "boolean", "required": true, "default": false },
+        { "key": "confirmed", "type": "boolean", "required": true, "default": false },
+        { "key": "attemptNumber", "type": "integer", "required": true, "default": 1 }
+      ],
+      "indexes": [
+        { "key": "idx_clientId", "type": "key", "attributes": ["clientId"] },
+        { "key": "idx_clientId_confirmed", "type": "key", "attributes": ["clientId", "confirmed"] }
+      ]
+    },
+    {
+      "$id": "complaint_categories",
+      "$permissions": [
+        "read(\"users\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "complaint_categories",
+      "documentSecurity": false,
+      "enabled": true,
+      "attributes": [
+        { "key": "labelFr", "type": "string", "size": 128, "required": true },
+        { "key": "labelAr", "type": "string", "size": 128, "required": false },
+        { "key": "labelZgh", "type": "string", "size": 128, "required": false },
+        { "key": "slaHours", "type": "integer", "required": false, "default": 48 }
+      ]
+    },
+    {
+      "$id": "complaints",
+      "$permissions": [
+        "create(\"users\")",
+        "read(\"team:support-agents\")",
+        "update(\"team:support-agents\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "complaints",
+      "documentSecurity": true,
+      "enabled": true,
+      "attributes": [
+        { "key": "clientId", "type": "string", "size": 64, "required": true },
+        { "key": "categoryId", "type": "string", "size": 64, "required": true },
+        { "key": "description", "type": "string", "size": 2000, "required": true },
+        { "key": "status", "type": "string", "size": 16, "required": true, "default": "nouveau" },
+        { "key": "attachmentFileIds", "type": "string", "size": 64, "required": false, "array": true },
+        { "key": "adminResponse", "type": "string", "size": 2000, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_clientId", "type": "key", "attributes": ["clientId"] }
+      ]
+    },
+    {
+      "$id": "notifications",
+      "$permissions": [],
+      "databaseId": "topmark_main",
+      "name": "notifications",
+      "documentSecurity": false,
+      "enabled": true,
+      "attributes": [
+        { "key": "clientId", "type": "string", "size": 64, "required": true },
+        { "key": "titleFr", "type": "string", "size": 256, "required": true },
+        { "key": "titleAr", "type": "string", "size": 256, "required": false },
+        { "key": "titleZgh", "type": "string", "size": 256, "required": false },
+        { "key": "read", "type": "boolean", "required": true, "default": false },
+        { "key": "relatedType", "type": "string", "size": 16, "required": true },
+        { "key": "relatedId", "type": "string", "size": 64, "required": false }
+      ],
+      "indexes": [
+        { "key": "idx_clientId", "type": "key", "attributes": ["clientId"] }
+      ]
+    },
+    {
+      "$id": "client_equipment",
+      "$permissions": [
+        "create(\"users\")",
+        "read(\"team:support-agents\")"
+      ],
+      "databaseId": "topmark_main",
+      "name": "client_equipment",
+      "documentSecurity": true,
+      "enabled": true,
+      "attributes": [
+        { "key": "clientId", "type": "string", "size": 64, "required": true },
+        { "key": "equipmentType", "type": "string", "size": 32, "required": true },
+        { "key": "brand", "type": "string", "size": 64, "required": false },
+        { "key": "model", "type": "string", "size": 64, "required": false },
+        { "key": "quantity", "type": "integer", "required": true, "default": 1 }
+      ],
+      "indexes": [
+        { "key": "idx_clientId", "type": "key", "attributes": ["clientId"] }
+      ]
+    }
+  ],
+  "buckets": [
+    {
+      "$id": "complaint_attachments",
+      "$permissions": [
+        "create(\"users\")"
+      ],
+      "name": "complaint_attachments",
+      "fileSecurity": true,
+      "enabled": true,
+      "maximumFileSize": 5242880,
+      "allowedFileExtensions": ["jpg", "jpeg", "png", "pdf", "heic"],
+      "compression": "gzip",
+      "encryption": true,
+      "antivirus": true
+    },
+    {
+      "$id": "avatars",
+      "$permissions": [
+        "create(\"users\")"
+      ],
+      "name": "avatars",
+      "fileSecurity": true,
+      "enabled": true,
+      "maximumFileSize": 2097152,
+      "allowedFileExtensions": ["jpg", "jpeg", "png"],
+      "compression": "gzip",
+      "encryption": true,
+      "antivirus": true
+    },
+    {
+      "$id": "lot_photos",
+      "$permissions": [
+        "read(\"users\")",
+        "create(\"team:support-agents\")",
+        "update(\"team:support-agents\")",
+        "delete(\"team:support-agents\")"
+      ],
+      "name": "lot_photos",
+      "fileSecurity": false,
+      "enabled": true,
+      "maximumFileSize": 5242880,
+      "allowedFileExtensions": ["jpg", "jpeg", "png"],
+      "compression": "gzip",
+      "encryption": true,
+      "antivirus": true
+    }
+  ],
+  "functions": [
+    {
+      "$id": "app-actions",
+      "name": "app-actions",
+      "runtime": "node-18.0",
+      "execute": ["users"],
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "path": "functions/app-actions",
+      "variables": [
+        { "key": "APPWRITE_ENDPOINT" },
+        { "key": "APPWRITE_PROJECT_ID" },
+        { "key": "APPWRITE_API_KEY" },
+        { "key": "APPWRITE_DATABASE_ID" }
+      ],
+      "events": [],
+      "schedule": "",
+      "timeout": 15
+    }
+  ]
+}
