@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { ID, Permission, Role } from "appwrite";
 import { account, databases, teams, DATABASE_ID, COLLECTIONS } from "./appwrite";
+import { secureCreateProfile } from "./secureActions.js";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -55,24 +56,7 @@ export function AuthProvider({ children }) {
     await account.createEmailPasswordSession(email, password);
     const current = await account.get();
 
-    const doc = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTIONS.CLIENTS,
-      ID.unique(),
-      {
-        userId: current.$id,
-        fullName,
-        phone: "",
-        email,
-        locale,
-        loyaltyPoints: 0,
-        tier: "bronze",
-      },
-      [
-        Permission.read(Role.user(current.$id)),
-        Permission.update(Role.user(current.$id)),
-      ]
-    );
+    const doc = await secureCreateProfile({ fullName, email, locale });
 
     setUser(current);
     setProfile(doc);
