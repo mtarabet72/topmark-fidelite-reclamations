@@ -16,6 +16,11 @@ async function callAction(action, params = {}) {
   return body;
 }
 
+export async function secureCreateProfile({ fullName, email, locale, phone }) {
+  const { profile } = await callAction("create-profile", { fullName, email, locale, phone });
+  return profile;
+}
+
 export async function secureStartSpin() {
   const { spin } = await callAction("start");
   return spin;
