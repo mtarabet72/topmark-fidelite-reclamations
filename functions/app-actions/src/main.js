@@ -1,4 +1,4 @@
-import { Client, Databases, Users, Query, ID } from "node-appwrite";
+import { Client, Databases, Users, Query, ID, Permission, Role } from "node-appwrite";
 
 const RANGES = [
   { min: 6, max: 11 },
@@ -17,6 +17,9 @@ const RANGES = [
 ];
 const MAX_ATTEMPTS = 2;
 const SUPPORT_TEAM_ID = "support-agents";
+const VALID_LOCALES = ["fr", "ar", "zgh"];
+const MAX_NAME_LEN = 128;
+const MAX_PHONE_LEN = 32;
 
 const COLLECTIONS = {
   CLIENTS: "clients",
@@ -75,6 +78,52 @@ export default async ({ req, res, log, error }) => {
   const action = body.action;
 
   try {
+    // ---------- Création de profil (inscription) ----------
+
+    if (action === "create-profile") {
+      const existing = await databases.listDocuments(databaseId, COLLECTIONS.CLIENTS, [
+        Query.equal("userId", userId),
+        Query.limit(1),
+      ]);
+      if (existing.total > 0) {
+        // Idempotent : si le profil existe déjà (double appel réseau, retry, etc.),
+        // on renvoie le profil existant plutôt que d'en créer un doublon.
+        return res.json({ profile: existing.documents[0] });
+      }
+
+      const { fullName, email, locale, phone } = body;
+      if (!fullName || typeof fullName !== "string" || fullName.length > MAX_NAME_LEN) {
+        return res.json({ error: "Nom invalide." }, 400);
+      }
+      if (!email || typeof email !== "string") {
+        return res.json({ error: "Email invalide." }, 400);
+      }
+      if (!VALID_LOCALES.includes(locale)) {
+        return res.json({ error: "Langue invalide." }, 400);
+      }
+      if (phone !== undefined && (typeof phone !== "string" || phone.length > MAX_PHONE_LEN)) {
+        return res.json({ error: "Téléphone invalide." }, 400);
+      }
+
+      const profile = await databases.createDocument(
+        databaseId,
+        COLLECTIONS.CLIENTS,
+        ID.unique(),
+        {
+          userId,
+          fullName,
+          phone: phone || "",
+          email,
+          locale,
+          loyaltyPoints: 0,
+          tier: "bronze",
+        },
+        [Permission.read(Role.user(userId)), Permission.update(Role.user(userId))]
+      );
+
+      return res.json({ profile });
+    }
+
     // ---------- Notifications ----------
 
     if (action === "notify") {
@@ -172,15 +221,21 @@ export default async ({ req, res, log, error }) => {
 
       const winner = drawPrize(prizesRes.documents);
 
-      const spin = await databases.createDocument(databaseId, COLLECTIONS.WHEEL_SPINS, ID.unique(), {
-        clientId: userId,
-        prizeId: winner.$id,
-        thresholdPoints: range.min,
-        spunAt: new Date().toISOString(),
-        delivered: false,
-        confirmed: false,
-        attemptNumber: 1,
-      });
+      const spin = await databases.createDocument(
+        databaseId,
+        COLLECTIONS.WHEEL_SPINS,
+        ID.unique(),
+        {
+          clientId: userId,
+          prizeId: winner.$id,
+          thresholdPoints: range.min,
+          spunAt: new Date().toISOString(),
+          delivered: false,
+          confirmed: false,
+          attemptNumber: 1,
+        },
+        [Permission.read(Role.user(userId))]
+      );
 
       return res.json({ spin });
     }
@@ -229,12 +284,18 @@ export default async ({ req, res, log, error }) => {
       });
 
       if (consumed > 0) {
-        await databases.createDocument(databaseId, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
-          clientId: userId,
-          type: "roue",
-          points: -consumed,
-          reason: `Tirage tombola confirmé (palier ${pending.thresholdPoints} kg)`,
-        });
+        await databases.createDocument(
+          databaseId,
+          COLLECTIONS.LOYALTY_TRANSACTIONS,
+          ID.unique(),
+          {
+            clientId: userId,
+            type: "roue",
+            points: -consumed,
+            reason: `Tirage tombola confirmé (palier ${pending.thresholdPoints} kg)`,
+          },
+          [Permission.read(Role.user(userId))]
+        );
       }
 
       return res.json({ newBalance: 0 });
