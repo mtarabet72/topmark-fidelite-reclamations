@@ -1,4 +1,4 @@
-import { ID, Query } from "appwrite";
+import { ID, Query, Permission, Role } from "appwrite";
 import { databases, DATABASE_ID, COLLECTIONS } from "./appwrite";
 import { RANGES } from "./tombola.js";
 import { secureNotify } from "./secureActions.js";
@@ -27,12 +27,18 @@ export async function recordPurchase({ client, kg }) {
   const points = Math.round(Number(kg));
   if (!points || points <= 0) throw new Error("Quantité invalide.");
 
-  await databases.createDocument(DATABASE_ID, COLLECTIONS.LOYALTY_TRANSACTIONS, ID.unique(), {
-    clientId: client.userId,
-    type: "gain",
-    points,
-    reason: `Achat ${kg} kg`,
-  });
+  await databases.createDocument(
+    DATABASE_ID,
+    COLLECTIONS.LOYALTY_TRANSACTIONS,
+    ID.unique(),
+    {
+      clientId: client.userId,
+      type: "gain",
+      points,
+      reason: `Achat ${kg} kg`,
+    },
+    [Permission.read(Role.user(client.userId))]
+  );
 
   const oldBalance = client.loyaltyPoints || 0;
   const newBalance = oldBalance + points;
