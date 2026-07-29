@@ -44,8 +44,8 @@ function drawPrize(prizes) {
 
 async function isSupportAgent(users, userId) {
   try {
-    const memberships = await users.listMemberships(userId);
-    return memberships.teams?.some((t) => t.$id === SUPPORT_TEAM_ID) || false;
+    const res = await users.listMemberships(userId);
+    return res.memberships?.some((m) => m.teamId === SUPPORT_TEAM_ID && m.confirm) || false;
   } catch {
     return false;
   }
