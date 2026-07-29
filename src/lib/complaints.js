@@ -10,7 +10,7 @@ export const STATUS_LABELS = {
 
 export function attachmentUrl(fileId) {
   if (!fileId) return null;
-  return storage.getFileView(BUCKETS.LOT_PHOTOS, fileId);
+  return storage.getFileView(BUCKETS.COMPLAINT_ATTACHMENTS, fileId);
 }
 
 export async function listCategories() {
@@ -28,7 +28,7 @@ export function categoryLabel(category, lang) {
 }
 
 export async function uploadAttachment(file) {
-  const uploaded = await storage.createFile(BUCKETS.LOT_PHOTOS, ID.unique(), file);
+  const uploaded = await storage.createFile(BUCKETS.COMPLAINT_ATTACHMENTS, ID.unique(), file);
   return uploaded.$id;
 }
 
