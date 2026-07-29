@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { useAuth } from "../lib/AuthContext.jsx";
-import { listMyNotifications } from "../lib/notifications.js";
+import { secureListNotifications } from "../lib/secureActions.js";
 import { GOLD, CREAM } from "../lib/theme.js";
 
 export default function NotificationBell({ setScreen }) {
@@ -10,7 +10,7 @@ export default function NotificationBell({ setScreen }) {
 
   useEffect(() => {
     if (!user) return;
-    listMyNotifications(user.$id)
+    secureListNotifications()
       .then((list) => setUnread(list.filter((n) => !n.read).length))
       .catch(() => setUnread(0));
   }, [user]);
