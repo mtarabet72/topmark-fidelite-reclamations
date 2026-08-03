@@ -182,6 +182,65 @@ export default async ({ req, res, log, error }) => {
       return res.json({ ok: true, count: list.documents.length });
     }
 
+    // ---------- Achat (saisi par l'admin) ----------
+
+    if (action === "record-purchase") {
+      const isAgent = await isSupportAgent(users, userId);
+      if (!isAgent) {
+        return res.json({ error: "Action réservée à l'équipe support." }, 403);
+      }
+
+      const { clientDocId, kg } = body;
+      const points = Math.round(Number(kg));
+      if (!clientDocId || !points || points <= 0) {
+        return res.json({ error: "Paramètres invalides." }, 400);
+      }
+
+      const clientDoc = await databases.getDocument(databaseId, COLLECTIONS.CLIENTS, clientDocId);
+      const clientUserId = clientDoc.userId;
+
+      await databases.createDocument(
+        databaseId,
+        COLLECTIONS.LOYALTY_TRANSACTIONS,
+        ID.unique(),
+        {
+          clientId: clientUserId,
+          type: "gain",
+          points,
+          reason: `Achat ${kg} kg`,
+        },
+        [Permission.read(Role.user(clientUserId))]
+      );
+
+      const oldBalance = clientDoc.loyaltyPoints || 0;
+      const newBalance = oldBalance + points;
+
+      await databases.updateDocument(databaseId, COLLECTIONS.CLIENTS, clientDocId, {
+        loyaltyPoints: newBalance,
+      });
+
+      // Notifie le client si l'achat lui fait franchir un nouveau palier tombola
+      const rangeBefore = findAvailableRange(oldBalance);
+      const rangeAfter = findAvailableRange(newBalance);
+      if (rangeAfter && rangeAfter.min !== rangeBefore?.min) {
+        try {
+          await databases.createDocument(databaseId, COLLECTIONS.NOTIFICATIONS, ID.unique(), {
+            clientId: clientUserId,
+            titleFr: `Nouveau palier tombola débloqué : ${rangeAfter.min}-${rangeAfter.max} kg ! Tentez votre chance.`,
+            titleAr: `تم فتح مستوى جديد للقرعة: ${rangeAfter.min}-${rangeAfter.max} كلغ! جربوا حظكم.`,
+            titleZgh: `ⴰⵙⵡⵉⵔ ⴰⵎⴰⵢⵏⵓ ⵏ ⵜⵓⵎⴱⵓⵍⴰ ⵉⵍⵍⵉ: ${rangeAfter.min}-${rangeAfter.max} ⴽⴳ! ⴰⵔⵎⵜ ⴰⵣⵎⵣ ⵏⵏⵓⵏ.`,
+            read: false,
+            relatedType: "loyalty",
+            relatedId: "",
+          });
+        } catch (notifErr) {
+          error("Notification palier non envoyée : " + notifErr.message);
+        }
+      }
+
+      return res.json({ newBalance });
+    }
+
     // ---------- Tombola ----------
 
     const clientDocs = await databases.listDocuments(databaseId, COLLECTIONS.CLIENTS, [
