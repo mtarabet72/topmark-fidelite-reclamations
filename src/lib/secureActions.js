@@ -21,6 +21,11 @@ export async function secureCreateProfile({ fullName, email, locale, phone }) {
   return profile;
 }
 
+export async function secureRecordPurchase({ clientDocId, kg }) {
+  const { newBalance } = await callAction("record-purchase", { clientDocId, kg });
+  return newBalance;
+}
+
 export async function secureStartSpin() {
   const { spin } = await callAction("start");
   return spin;
